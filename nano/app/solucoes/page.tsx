@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import SiteBreadcrumb from "../components/SiteBreadcrumb";
 import { categories } from "./catalogo";
 
 export const metadata = {
@@ -13,15 +14,13 @@ export default function SolucoesPage() {
   return (
     <main className="min-h-screen bg-[#f7f9fc] pt-20 text-[#24298D]">
       <SiteHeader activePage="solucoes" />
-      <section className="bg-[#24298D] px-6 py-16 text-white lg:px-10 lg:py-20">
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">Nosso catálogo</p>
-          <h1 className="max-w-3xl text-5xl font-black leading-tight tracking-[-0.04em] sm:text-6xl">
+      <SiteBreadcrumb items={[{ label: "Home", href: "/" }, { label: "Produtos" }]} />
+      <section className="bg-[#24298D] px-6 py-8 text-white lg:px-10 lg:py-10">
+        <div className="mx-auto max-w-7xl text-center">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#FF8200]">Nosso catálogo</p>
+          <h1 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:whitespace-nowrap">
             Soluções para cada etapa da sua operação.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
-            Escolha um segmento para conhecer as soluções desenvolvidas pela Nanoquímica.
-          </p>
         </div>
       </section>
 
