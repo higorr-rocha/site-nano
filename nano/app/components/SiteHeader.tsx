@@ -5,16 +5,27 @@ import Link from "next/link";
 import { useState } from "react";
 import logo from "../images/logo.png";
 
+export type ActivePage =
+  | "home"
+  | "empresa"
+  | "solucoes"
+  | "certificacoes"
+  | "novidades"
+  | "trabalhe-conosco"
+  | "contato";
+
 type SiteHeaderProps = {
-  activePage?: "home" | "empresa" | "solucoes";
+  activePage?: ActivePage;
 };
 
-const navItems = [
-  { label: "Início", href: "/", page: "home" as const },
-  { label: "Empresa", href: "/empresa", page: "empresa" as const },
-  { label: "Soluções", href: "/solucoes", page: "solucoes" as const },
-  { label: "Serviços", href: "/#contato" },
-  { label: "Contato", href: "/#contato" },
+const navItems: { label: string; href: string; page: ActivePage }[] = [
+  { label: "Início", href: "/", page: "home" },
+  { label: "Empresa", href: "/empresa", page: "empresa" },
+  { label: "Soluções", href: "/solucoes", page: "solucoes" },
+  { label: "Certificações", href: "/certificacoes", page: "certificacoes" },
+  { label: "Novidades", href: "/novidades", page: "novidades" },
+  { label: "Trabalhe Conosco", href: "/trabalhe-conosco", page: "trabalhe-conosco" },
+  { label: "Contato", href: "/contato", page: "contato" },
 ];
 
 export default function SiteHeader({ activePage }: SiteHeaderProps) {
@@ -22,7 +33,7 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white shadow-[0_4px_20px_rgba(36,41,141,0.08)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-6 py-4 lg:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-10">
         <Link href="/" className="flex h-12 shrink-0 items-center" aria-label="Nanoquímica - início">
           <span className="relative flex h-14 w-56 items-center overflow-hidden" aria-hidden="true">
             <Image
@@ -35,7 +46,7 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
           </span>
         </Link>
 
-        <nav className="ml-auto hidden h-12 items-center gap-10 text-sm font-semibold md:flex lg:gap-12">
+        <nav className="ml-auto hidden h-12 items-center gap-7 text-sm font-semibold lg:flex xl:gap-9">
           <Link className={activePage === "home" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"} href="/">
             Início
           </Link>
@@ -56,13 +67,23 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
                   href={`/solucoes/${category}`}
                   className="block rounded-lg px-4 py-3 text-sm font-semibold capitalize text-[#24298D] hover:bg-[#24298D]/10 hover:text-[#FF8200]"
                 >
-                  {category === "acucar" ? "Açúcar" : category}
+                  {category === "acucar" ? "Açúcar" : category === "industria" ? "Indústria" : "Etanol"}
                 </Link>
               ))}
             </div>
           </div>
-          <Link className="transition-colors hover:text-[#FF8200]" href="/#contato">Serviços</Link>
-          <Link className="transition-colors hover:text-[#FF8200]" href="/#contato">Contato</Link>
+          <Link className={activePage === "certificacoes" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"} href="/certificacoes">
+            Certificações
+          </Link>
+          <Link className={activePage === "novidades" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"} href="/novidades">
+            Novidades
+          </Link>
+          <Link className={activePage === "trabalhe-conosco" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"} href="/trabalhe-conosco">
+            Trabalhe Conosco
+          </Link>
+          <Link className={activePage === "contato" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"} href="/contato">
+            Contato
+          </Link>
         </nav>
 
         <button
@@ -71,7 +92,7 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
           aria-controls="mobile-navigation"
           aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
           onClick={() => setIsMenuOpen((open) => !open)}
-          className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-[#24298D] text-[#24298D] md:hidden"
+          className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-[#24298D] text-[#24298D] lg:hidden"
         >
           <span className="h-0.5 w-5 bg-current" />
           <span className="h-0.5 w-5 bg-current" />
@@ -82,14 +103,14 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
       {isMenuOpen && (
         <nav
           id="mobile-navigation"
-          className="border-t border-slate-200 bg-white px-6 py-4 shadow-lg md:hidden"
+          className="border-t border-slate-200 bg-white px-6 py-4 shadow-lg lg:hidden"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
             {navItems.map((item) => (
               <div key={item.label}>
                 <Link
                   className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
-                    item.page && item.page === activePage
+                    item.page === activePage
                       ? "bg-[#24298D] text-white"
                       : "text-[#24298D] hover:bg-[#24298D]/10"
                   }`}
@@ -107,7 +128,7 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
                         onClick={() => setIsMenuOpen(false)}
                         className="block rounded-lg px-4 py-2 text-sm text-[#24298D] hover:bg-[#24298D]/10 hover:text-[#FF8200]"
                       >
-                        {category === "acucar" ? "Açúcar" : category}
+                        {category === "acucar" ? "Açúcar" : category === "industria" ? "Indústria" : "Etanol"}
                       </Link>
                     ))}
                   </div>

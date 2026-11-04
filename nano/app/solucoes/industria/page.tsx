@@ -9,7 +9,7 @@ export const metadata = { title: "Soluções para indústria | Nanoquímica" };
 
 export default function IndustriaPage() {
   return (
-    <main className="min-h-screen bg-[#f7f9fc] pt-20 text-[#24298D]">
+    <main className="min-h-screen bg-[#f5f2eb] pt-20 text-[#24298D]">
       <SiteHeader activePage="solucoes" />
       <SiteBreadcrumb items={[{ label: "Home", href: "/" }, { label: "Produtos", href: "/solucoes" }, { label: "Indústria" }]} />
       <section className="bg-[#24298D] px-6 py-7 text-white lg:px-10 lg:py-10">
@@ -24,11 +24,17 @@ export default function IndustriaPage() {
       <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {productsByCategory.industria.map(({ slug, title, image }) => (
-            <Link key={slug} href={`/solucoes/industria/${slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-[0_12px_35px_rgba(36,41,141,0.08)]">
+            <Link key={slug} href={`/solucoes/industria/${slug}`} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_35px_rgba(36,41,141,0.08)]">
               <div className="relative aspect-[700/480] overflow-hidden bg-[#24298D]/10">
-                <Image src={image} alt={title} width={700} height={480} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <Image
+                  src={image}
+                  alt={title}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
               </div>
-              <div className="p-5">
+              <div className="flex flex-1 flex-col justify-between p-5">
                 <h2 className="text-base font-bold leading-6">{title}</h2>
                 <span className="mt-3 inline-flex text-sm font-bold text-[#FF8200]">Ver produto →</span>
               </div>

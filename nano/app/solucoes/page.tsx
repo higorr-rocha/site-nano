@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function SolucoesPage() {
   return (
-    <main className="min-h-screen bg-[#f7f9fc] pt-20 text-[#24298D]">
+    <main className="min-h-screen bg-[#f5f2eb] pt-20 text-[#24298D]">
       <SiteHeader activePage="solucoes" />
       <SiteBreadcrumb items={[{ label: "Home", href: "/" }, { label: "Produtos" }]} />
       <section className="bg-[#24298D] px-6 py-8 text-white lg:px-10 lg:py-10">

@@ -1,33 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import capa from "./images/capa.png";
+import historia1 from "./images/historia_1.png";
 import SiteFooter from "./components/SiteFooter";
 import SiteHeader from "./components/SiteHeader";
-
-const solutions = [
-  {
-    number: "01",
-    title: "Tratamento de água",
-    description:
-      "Produtos desenvolvidos para melhorar a eficiência e a segurança de cada etapa do tratamento.",
-  },
-  {
-    number: "02",
-    title: "Higienização industrial",
-    description:
-      "Soluções de alta performance para ambientes mais limpos, produtivos e em conformidade.",
-  },
-  {
-    number: "03",
-    title: "Processos personalizados",
-    description:
-      "Análise técnica e formulações sob medida para os desafios específicos da sua operação.",
-  },
-];
+import { categories } from "./solucoes/catalogo";
 
 export default function Home() {
   return (
-    <main className="overflow-hidden bg-[#f7f9fc] pt-20 text-[#24298D]">
+    <main className="overflow-hidden bg-[#f5f2eb] pt-20 text-[#24298D]">
       <SiteHeader activePage="home" />
 
       <section className="relative isolate aspect-[1920/780] w-full bg-[#24298D]/10">
@@ -42,85 +23,150 @@ export default function Home() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/10 via-transparent to-transparent" />
       </section>
 
-      <section id="empresa" className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1fr_1.2fr] lg:px-10 lg:py-28">
-        <div>
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">Sobre a Nanoquímica</p>
-          <h1 className="max-w-lg text-4xl font-black leading-[1.05] tracking-[-0.04em] sm:text-5xl">
-            Química que transforma processos.
-          </h1>
-        </div>
-
-        <div className="max-w-2xl space-y-6 text-lg leading-8 text-slate-600">
+      <section id="empresa" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-24">
+        <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+          Sobre a Nanoquímica
+        </p>
+        <h1 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+          Química que transforma processos.
+        </h1>
+        <div className="mt-6 max-w-4xl space-y-4 text-base leading-8 text-slate-600 sm:text-lg">
           <p>
             Unimos conhecimento técnico, inovação e proximidade para entregar soluções químicas que fazem a indústria avançar.
           </p>
           <p>
             Da escolha do produto ao acompanhamento da aplicação, nossa equipe trabalha ao lado do seu negócio para gerar mais eficiência, qualidade e segurança.
           </p>
-          <Link href="#solucoes" className="inline-flex items-center gap-3 font-bold text-[#24298D] hover:text-[#FF8200]">
-            Conheça nossa atuação <span className="text-2xl">→</span>
-          </Link>
+          <div className="pt-2">
+            <Link href="/solucoes" className="inline-flex items-center gap-3 font-bold text-[#24298D] hover:text-[#FF8200]">
+              Conheça nossa atuação <span className="text-2xl">→</span>
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section id="solucoes" className="bg-[#24298D] px-6 py-20 text-white lg:px-10 lg:py-24">
+      <section id="produtos-setores" className="bg-[#24298D] px-6 py-20 text-white lg:px-10 lg:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-              <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">Como podemos ajudar</p>
-              <h2 className="max-w-xl text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
-                Soluções para cada etapa da sua operação.
-              </h2>
-            </div>
-            <p className="max-w-xs text-sm leading-6 text-white/80">
-              Tecnologia e suporte para diferentes segmentos da indústria.
+          <div className="mb-12">
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+              Nanoquímica
             </p>
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:whitespace-nowrap lg:text-[42px] xl:text-5xl">
+              Produtos químicos para usinas e indústrias
+            </h2>
           </div>
 
-          <div className="grid gap-3 rounded-2xl bg-white/20 p-1 md:grid-cols-3">
-            {solutions.map((solution) => (
-              <div key={solution.number} className="group relative min-h-72">
-                <article className="absolute inset-0 bg-[#24298D] p-8">
-                  <span className="text-5xl font-black leading-none text-[#FF8200]">{solution.number}</span>
-                  <h3 className="mt-12 text-2xl font-bold">{solution.title}</h3>
-                </article>
-
-                <article className="absolute inset-0 z-10 flex translate-y-3 scale-95 flex-col bg-[#FF8200] p-8 opacity-0 shadow-2xl transition-all duration-300 group-hover:translate-y-[-14px] group-hover:scale-105 group-hover:opacity-100">
-                  <span className="text-5xl font-black leading-none text-white/80">{solution.number}</span>
-                  <h3 className="mt-8 text-2xl font-bold">{solution.title}</h3>
-                  <p className="mt-4 text-sm leading-6 text-white">{solution.description}</p>
-                  <a
-                    href="#contato"
-                    className="mt-auto inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-bold transition-colors hover:bg-white/25"
-                  >
-                    Saiba mais <span>→</span>
-                  </a>
-                </article>
-              </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {categories.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/solucoes/${category.slug}`}
+                className="group overflow-hidden rounded-2xl bg-[#FAF8F3] text-[#24298D] shadow-[0_16px_50px_rgba(0,0,0,0.2)]"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#24298D]/10">
+                  <Image
+                    src={category.image}
+                    alt={`Produtos para ${category.title}`}
+                    fill
+                    sizes="(min-width: 1024px) 33vw, 100vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-7">
+                  <h3 className="text-2xl font-bold">{category.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{category.description}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 font-bold text-[#FF8200]">
+                    Ver produtos <span className="text-xl">→</span>
+                  </span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="contato" className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:px-10 lg:py-28">
-        <div>
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">Vamos conversar</p>
-          <h2 className="max-w-2xl text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
-            Conte com a Nanoquímica para encontrar a melhor solução.
-          </h2>
+      <section id="visita-tecnica" className="bg-[#ede9df] px-6 py-20 lg:px-10 lg:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 rounded-3xl bg-[#FAF8F3] p-8 shadow-[0_16px_50px_rgba(36,41,141,0.08)] sm:p-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+          <div className="relative aspect-[655/538] w-full overflow-hidden rounded-2xl bg-[#d8e8fa] shadow-[0_12px_35px_rgba(36,41,141,0.1)]">
+            <Image
+              src={historia1}
+              alt="Visita técnica Nanoquímica"
+              fill
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+              Agende sua
+            </p>
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+              Visita técnica
+            </h2>
+            <p className="mt-6 text-justify text-base leading-8 text-slate-600 sm:text-lg">
+              Quando os clientes enfrentam desafios em seus processos, a Nanoquímica oferece assistência personalizada por meio de visitas técnicas no local. Nossa equipe altamente qualificada realiza uma análise detalhada, identificando as raízes do problema e fornecendo soluções eficazes e econômicas. Além disso, oferecemos orientação e treinamento para capacitar os clientes a lidar com desafios futuros. Com nosso compromisso com a excelência técnica e o serviço excepcional, garantimos a satisfação total de nossos clientes em todas as etapas.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link
+                href="/contato"
+                className="inline-flex items-center gap-3 rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+              >
+                Entrar em contato <span className="text-lg">→</span>
+              </Link>
+              <a
+                href="https://api.whatsapp.com/send?phone=5505516982100266"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-[#24298D] px-6 py-4 text-sm font-bold text-[#24298D] transition-colors hover:bg-[#24298D] hover:text-white"
+              >
+                WhatsApp
+              </a>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="rounded-2xl bg-white p-8 shadow-[0_16px_50px_rgba(9,36,111,0.08)]">
-          <p className="text-lg font-semibold text-[#24298D]">Fale com o nosso time técnico</p>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            Tire dúvidas, solicite uma proposta ou descubra a solução ideal para o seu processo.
-          </p>
-          <a
-            href="mailto:contato@nanoquimica.com.br"
-            className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 font-bold text-white transition-colors hover:bg-[#FF8200]/85"
-          >
-            Entrar em contato <span className="ml-3 text-xl">→</span>
-          </a>
+      <section className="mb-[4px] bg-[#24298D] px-6 py-14 text-white lg:px-10 lg:py-16">
+        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-2">
+          <article className="flex flex-col justify-between rounded-2xl bg-white/10 p-8 lg:p-10">
+            <div>
+              <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+                Excelência Nanoquímica
+              </p>
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.03em] sm:text-4xl">
+                Certificações
+              </h2>
+              <p className="mt-4 text-base leading-7 text-white/80">
+                Atuamos com todas as licenças, alvarás e certificações exigidas pelos órgãos reguladores para garantir total segurança, conformidade e qualidade no fornecimento de insumos químicos.
+              </p>
+            </div>
+            <Link
+              href="/certificacoes"
+              className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#FF8200] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+            >
+              Saiba mais <span>→</span>
+            </Link>
+          </article>
+
+          <article className="flex flex-col justify-between rounded-2xl bg-white/10 p-8 text-white lg:p-10">
+            <div>
+              <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+                Conheça
+              </p>
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.03em] sm:text-4xl">
+                A Nanoquímica
+              </h2>
+              <p className="mt-4 text-base leading-7 text-white/80">
+                Você que busca qualidade e variedade em produtos para sua indústria, aqui você encontra.
+              </p>
+            </div>
+            <Link
+              href="/empresa"
+              className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#FF8200] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+            >
+              Saiba mais <span>→</span>
+            </Link>
+          </article>
         </div>
       </section>
 

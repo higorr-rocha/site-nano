@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function AcucarPage() {
   return (
-    <main className="min-h-screen bg-[#f7f9fc] pt-20 text-[#24298D]">
+    <main className="min-h-screen bg-[#f5f2eb] pt-20 text-[#24298D]">
       <SiteHeader activePage="solucoes" />
       <SiteBreadcrumb items={[{ label: "Home", href: "/" }, { label: "Produtos", href: "/solucoes" }, { label: "Açúcar" }]} />
       <section className="bg-[#24298D] px-6 py-7 text-white lg:px-10 lg:py-10">
@@ -22,7 +22,7 @@ export default function AcucarPage() {
             <p className="mb-2 mt-4 text-xs font-bold uppercase tracking-[0.2em] text-[#FF8200]">Categoria</p>
             <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl">Açúcar</h1>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-white/80">
-            Produtos para apoiar o controle, a eficiência e a qualidade do processo produtivo.
+              Produtos para apoiar o controle, a eficiência e a qualidade do processo produtivo.
             </p>
           </div>
         </div>
@@ -31,7 +31,7 @@ export default function AcucarPage() {
       <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {productsByCategory.acucar.map(({ slug, title, image }) => (
-            <Link key={slug} href={`/solucoes/acucar/${slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-[0_12px_35px_rgba(36,41,141,0.08)]">
+            <Link key={slug} href={`/solucoes/acucar/${slug}`} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_35px_rgba(36,41,141,0.08)]">
               <div className="relative aspect-[700/480] overflow-hidden bg-[#24298D]/10">
                 <Image
                   src={image}
@@ -41,7 +41,7 @@ export default function AcucarPage() {
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <div className="p-5">
+              <div className="flex flex-1 flex-col justify-between p-5">
                 <h2 className="text-base font-bold leading-6">{title}</h2>
                 <span className="mt-3 inline-flex text-sm font-bold text-[#FF8200]">Ver produto →</span>
               </div>

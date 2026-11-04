@@ -1,0 +1,11 @@
+{
+  "name": "nano-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix nano run dev",
+    "build": "npm --prefix nano run build",
+    "start": "npm --prefix nano run start",
+    "lint": "npm --prefix nano run lint"
+  }
+}

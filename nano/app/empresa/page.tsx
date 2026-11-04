@@ -32,20 +32,18 @@ const principles = [
 
 export default function EmpresaPage() {
   return (
-    <main className="overflow-hidden bg-[#f7f9fc] pt-20 text-[#24298D]">
+    <main className="overflow-hidden bg-[#f5f2eb] pt-20 text-[#24298D]">
       <SiteHeader activePage="empresa" />
 
       <section className="relative bg-[#24298D] px-6 py-16 text-white lg:px-10 lg:py-20">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-          <div>
-            <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
-              Sobre a Nanoquímica
-            </p>
-            <h1 className="max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-              Uma história construída com conhecimento e parceria.
-            </h1>
-          </div>
-          <p className="max-w-lg text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+        <div className="mx-auto max-w-7xl">
+          <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+            Sobre a Nanoquímica
+          </p>
+          <h1 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:whitespace-nowrap lg:text-[42px] xl:text-5xl">
+            Uma história construída com conhecimento e parceria.
+          </h1>
+          <p className="mt-5 max-w-4xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
             Mais do que uma empresa de produtos químicos, somos pessoas que acreditam no poder da ciência para transformar o setor agroindustrial.
           </p>
         </div>
@@ -62,13 +60,13 @@ export default function EmpresaPage() {
             />
           </div>
           <div>
-            <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
               A nossa história
             </p>
-            <h2 className="max-w-xl text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl">
               Experiência que se transforma em solução.
             </h2>
-            <div className="mt-8 max-w-2xl space-y-5 text-lg leading-8 text-slate-600">
+            <div className="mt-6 max-w-2xl space-y-5 text-lg leading-8 text-slate-600">
               <p>
                 Fundada por profissionais com ampla experiência no segmento químico, a Nanoquímica nasceu com o propósito de unir conhecimento técnico, inovação e proximidade com o cliente. Desde o início, buscamos ir além do fornecimento de produtos, desenvolvendo soluções que contribuam para a eficiência dos processos e melhores resultados.
               </p>
@@ -82,17 +80,17 @@ export default function EmpresaPage() {
 
       <section className="bg-white px-6 py-20 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-14 max-w-2xl">
-            <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+          <div className="mb-14">
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
               O que nos move
             </p>
-            <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               Um jeito de trabalhar baseado em pessoas.
             </h2>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            <article className="rounded-2xl bg-[#f7f9fc] p-8">
+            <article className="rounded-2xl bg-[#f5f2eb] p-8">
               <p className="text-5xl font-black text-[#FF8200]">01</p>
               <h3 className="mt-10 text-2xl font-bold">Missão</h3>
               <p className="mt-4 leading-7 text-slate-600">
@@ -119,10 +117,10 @@ export default function EmpresaPage() {
 
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-28">
         <div>
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
             Política de qualidade
           </p>
-          <h2 className="max-w-xl text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
+          <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl">
             Qualidade em cada relação e em cada processo.
           </h2>
           <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
@@ -157,25 +155,25 @@ export default function EmpresaPage() {
       </section>
 
       <section className="bg-[#24298D] px-6 py-20 text-white lg:px-10 lg:py-24">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
-          <div>
-            <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
-              Mais do que uma empresa de produtos químicos
-            </p>
-            <h2 className="max-w-2xl text-4xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
-              Ciência, parceria e conhecimento para transformar.
-            </h2>
+        <div className="mx-auto max-w-7xl">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+            Mais do que uma empresa de produtos químicos
+          </p>
+          <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+            Ciência, parceria e conhecimento para transformar.
+          </h2>
+          <p className="mt-4 max-w-4xl text-lg leading-8 text-white/80">
+            Nosso time cresce junto com a empresa, sempre com responsabilidade, respeito e foco em resultados.
+          </p>
+          <div className="mt-8">
+            <Link
+              href="/contato"
+              className="inline-flex items-center gap-3 rounded-full bg-[#FF8200] px-6 py-4 font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+            >
+              Fale com a nossa equipe <span className="text-xl">→</span>
+            </Link>
           </div>
-          <Link
-            href="/#contato"
-            className="inline-flex shrink-0 items-center gap-3 rounded-full bg-[#FF8200] px-6 py-4 font-bold text-white transition-colors hover:bg-[#FF8200]/85"
-          >
-            Fale com a nossa equipe <span className="text-xl">→</span>
-          </Link>
         </div>
-        <p className="mx-auto mt-10 max-w-7xl text-lg leading-8 text-white/80">
-          Nosso time cresce junto com a empresa, sempre com responsabilidade, respeito e foco em resultados.
-        </p>
       </section>
 
       <SiteFooter />
