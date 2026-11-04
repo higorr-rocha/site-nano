@@ -11,6 +11,7 @@ export type ActivePage =
   | "solucoes"
   | "certificacoes"
   | "novidades"
+  | "servicos"
   | "trabalhe-conosco"
   | "contato";
 
