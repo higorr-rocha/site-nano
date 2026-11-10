@@ -235,14 +235,10 @@ export function checkRateLimit(
 }
 
 export function getClientIdentifier(req: NextRequest): string {
-  const ip = getClientIp(req);
+  const forwarded = req.headers.get("x-forwarded-for");
+  const ip = forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
   const ua = req.headers.get("user-agent") || "unknown";
   return crypto.createHash("sha256").update(`${ip}|${ua}`).digest("hex").slice(0, 32);
-}
-
-export function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  return forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
 }
 
 // Cryptographic Challenge & Request/Response HMAC-SHA256 Signing using .env secret
@@ -325,23 +321,11 @@ export function signedJsonResponse(
 }
 
 // Cloudflare Turnstile Invisible Captcha Server-Side Verification via .env keys
-export async function verifyCloudflareTurnstile(
-  tokenRaw: unknown,
-  remoteIp?: string,
-  expectedAction?: string
-): Promise<boolean> {
+export async function verifyCloudflareTurnstile(tokenRaw: unknown, remoteIp?: string): Promise<boolean> {
   const token = typeof tokenRaw === "string" ? tokenRaw.trim() : "";
-  if (!token || token.length > 2048) return false;
+  if (!token) return false;
 
   const secretKey = getRequiredEnv("TURNSTILE_SECRET_KEY");
-  const expectedHostnames = new Set(
-    (process.env.TURNSTILE_HOSTNAMES || "")
-      .split(",")
-      .map((hostname) => hostname.trim().toLowerCase())
-      .filter(Boolean)
-  );
-  if (expectedHostnames.size === 0) return false;
-
   const verifyUrl =
     process.env.TURNSTILE_VERIFY_URL ||
     "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -356,18 +340,8 @@ export async function verifyCloudflareTurnstile(
       method: "POST",
       body: formData,
     });
-    if (!response.ok) return false;
-    const data = (await response.json()) as {
-      success?: boolean;
-      action?: string;
-      hostname?: string;
-    };
-    return Boolean(
-      data.success &&
-        (!expectedAction || data.action === expectedAction) &&
-        typeof data.hostname === "string" &&
-        expectedHostnames.has(data.hostname.toLowerCase())
-    );
+    const data = (await response.json()) as { success?: boolean };
+    return Boolean(data.success);
   } catch {
     return false;
   }

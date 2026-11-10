@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import {
   checkRateLimit,
   createSessionToken,
-  getClientIp,
   getClientIdentifier,
   getSessionCookieName,
   signedJsonResponse,
@@ -40,11 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const captchaOk = await verifyCloudflareTurnstile(
-      body.turnstileToken,
-      getClientIp(req),
-      "login"
-    );
+    const captchaOk = await verifyCloudflareTurnstile(body.turnstileToken);
     if (!captchaOk) {
       return signedJsonResponse(
         { ok: false, error: "Falha na verificação automática de segurança (Cloudflare Turnstile)." },
