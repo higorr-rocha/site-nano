@@ -2,12 +2,34 @@
 
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import SiteFooter from "../../components/SiteFooter";
 import SiteHeader from "../../components/SiteHeader";
 
 // Cloudflare Turnstile Invisible Sitekey (configurable via NEXT_PUBLIC_TURNSTILE_SITE_KEY)
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+
+type TurnstileApi = {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      action: string;
+      size: "invisible";
+      callback: (token: string) => void;
+      "expired-callback": () => void;
+      "error-callback": () => void;
+    }
+  ) => string;
+  execute: (widgetId: string) => void;
+  reset: (widgetId: string) => void;
+};
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
 
 export default function AcessoLoginPage() {
   const router = useRouter();
@@ -17,6 +39,9 @@ export default function AcessoLoginPage() {
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [serverSigVerified, setServerSigVerified] = useState(false);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileTokenResolver = useRef<((token: string) => void) | null>(null);
 
   const [challenge, setChallenge] = useState<{
     challengeNonce: string;
@@ -46,12 +71,57 @@ export default function AcessoLoginPage() {
     const timer = window.setTimeout(() => {
       void loadChallenge();
     }, 0);
-    (window as unknown as Record<string, unknown>).onTurnstileSuccess = (token: string) => {
-      if (token) setTurnstileToken(token);
-    };
 
     return () => window.clearTimeout(timer);
   }, []);
+
+  const handleTurnstileLoad = () => {
+    if (!window.turnstile || !turnstileContainerRef.current || turnstileWidgetId.current) {
+      return;
+    }
+
+    turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      action: "login",
+      size: "invisible",
+      callback: (token) => {
+        setTurnstileToken(token);
+        turnstileTokenResolver.current?.(token);
+        turnstileTokenResolver.current = null;
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+        turnstileTokenResolver.current = null;
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        turnstileTokenResolver.current = null;
+        setErrorMsg("Não foi possível carregar a verificação de segurança.");
+      },
+    });
+  };
+
+  const getTurnstileToken = async (): Promise<string> => {
+    if (turnstileToken) return turnstileToken;
+    if (!window.turnstile || !turnstileWidgetId.current) {
+      throw new Error("CAPTCHA_NOT_READY");
+    }
+
+    const widgetId = turnstileWidgetId.current;
+    return new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        turnstileTokenResolver.current = null;
+        reject(new Error("CAPTCHA_TIMEOUT"));
+      }, 10000);
+
+      turnstileTokenResolver.current = (token) => {
+        window.clearTimeout(timeout);
+        resolve(token);
+      };
+      window.turnstile?.reset(widgetId);
+      window.turnstile?.execute(widgetId);
+    });
+  };
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,6 +129,7 @@ export default function AcessoLoginPage() {
     setLoading(true);
 
     try {
+      const captchaToken = await getTurnstileToken();
       let activeChallenge = challenge;
       if (!activeChallenge) {
         const resC = await fetch("/api/seguranca/desafio", { cache: "no-store" });
@@ -71,7 +142,7 @@ export default function AcessoLoginPage() {
         body: JSON.stringify({
           email: String(email),
           password: String(password),
-          turnstileToken,
+          turnstileToken: captchaToken,
           challengeNonce: activeChallenge?.challengeNonce,
           challengeTimestamp: activeChallenge?.challengeTimestamp,
           challengeSignature: activeChallenge?.challengeSignature,
@@ -107,6 +178,7 @@ export default function AcessoLoginPage() {
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
+        onLoad={handleTurnstileLoad}
       />
       <SiteHeader />
 
@@ -170,13 +242,7 @@ export default function AcessoLoginPage() {
               />
             </div>
 
-            {/* Cloudflare Turnstile Invisible Widget */}
-            <div
-              className="cf-turnstile"
-              data-sitekey={TURNSTILE_SITE_KEY}
-              data-size="invisible"
-              data-callback="onTurnstileSuccess"
-            />
+            <div ref={turnstileContainerRef} aria-hidden="true" />
 
             <button
               type="submit"
