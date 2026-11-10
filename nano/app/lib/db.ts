@@ -1,85 +1,113 @@
-import { execFileSync } from "child_process";
+import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 
+let connection: Database.Database | null = null;
+
 function resolveDbPath(): string {
-  const configured = process.env.NANO_DB_PATH || "./database/nanoquimica.sqlite";
-  return path.isAbsolute(configured)
-    ? configured
-    : path.join(process.cwd(), configured);
-}
+  const configured = process.env.NANO_DB_PATH;
+  if (configured) {
+    if (path.isAbsolute(configured) || process.env.NODE_ENV !== "production") {
+      return path.isAbsolute(configured)
+        ? configured
+        : path.join(process.cwd(), configured);
+    }
 
-function ensureDatabaseInitialized(dbPath: string): void {
-  const dir = path.dirname(dbPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    return path.join("/tmp", path.basename(configured));
   }
+
+  return process.env.NODE_ENV === "production"
+    ? path.join("/tmp", "nanoquimica.sqlite")
+    : path.join(process.cwd(), "database", "nanoquimica.sqlite");
 }
 
-const PYTHON_SQLITE_BRIDGE = `
-import json, sqlite3, sys
-db_path = sys.argv[1]
-mode = sys.argv[2]
-sql = sys.argv[3]
-params = json.loads(sys.argv[4])
+function getConnection(): Database.Database {
+  if (connection) {
+    return connection;
+  }
 
-conn = sqlite3.connect(db_path, timeout=10.0)
-conn.row_factory = sqlite3.Row
-cur = conn.cursor()
-cur.execute(sql, params)
-if mode == "all":
-    rows = [dict(r) for r in cur.fetchall()]
-    print(json.dumps({"ok": True, "rows": rows}))
-elif mode == "get":
-    row = cur.fetchone()
-    print(json.dumps({"ok": True, "row": dict(row) if row else None}))
-else:
-    conn.commit()
-    print(json.dumps({"ok": True, "changes": cur.rowcount}))
-conn.close()
-`;
+  const dbPath = resolveDbPath();
+  const dir = path.dirname(dbPath);
+  fs.mkdirSync(dir, { recursive: true });
+  connection = new Database(dbPath);
+  connection.pragma("journal_mode = WAL");
+
+  const schemaPath = path.join(process.cwd(), "database", "schema.sql");
+  connection.exec(fs.readFileSync(schemaPath, "utf8"));
+  seedAccountsFromEnvironment(connection);
+  return connection;
+}
+
+function seedAccountsFromEnvironment(db: Database.Database): void {
+  const rawAccounts = process.env.NANO_ACCOUNTS_JSON;
+  if (!rawAccounts) {
+    return;
+  }
+
+  let accounts: Array<{
+    id: string;
+    email: string;
+    name: string;
+    roleLabel: string;
+    scopes: string[];
+    passwordSalt: string;
+    passwordHash: string;
+    active?: boolean;
+    createdAt?: string;
+  }>;
+
+  try {
+    accounts = JSON.parse(rawAccounts) as typeof accounts;
+  } catch {
+    throw new Error("NANO_ACCOUNTS_JSON contém JSON inválido.");
+  }
+
+  const insert = db.prepare(
+    `INSERT INTO accounts (
+      id, email, name, role_label, scopes_json, password_salt, password_hash, active, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      email = excluded.email,
+      name = excluded.name,
+      role_label = excluded.role_label,
+      scopes_json = excluded.scopes_json,
+      password_salt = excluded.password_salt,
+      password_hash = excluded.password_hash,
+      active = excluded.active`
+  );
+
+  const transaction = db.transaction(() => {
+    for (const account of accounts) {
+      insert.run(
+        account.id,
+        account.email,
+        account.name,
+        account.roleLabel,
+        JSON.stringify(account.scopes),
+        account.passwordSalt,
+        account.passwordHash,
+        account.active === false ? 0 : 1,
+        account.createdAt || new Date().toISOString()
+      );
+    }
+  });
+  transaction();
+}
 
 export function dbQueryAll<T = Record<string, unknown>>(
   sql: string,
   params: unknown[] = []
 ): T[] {
-  const dbPath = resolveDbPath();
-  ensureDatabaseInitialized(dbPath);
-
-  const out = execFileSync(
-    "python3",
-    ["-c", PYTHON_SQLITE_BRIDGE, dbPath, "all", sql, JSON.stringify(params)],
-    { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-  );
-  const parsed = JSON.parse(out.trim()) as { ok: boolean; rows: T[] };
-  return parsed.rows || [];
+  return getConnection().prepare(sql).all(...params) as T[];
 }
 
 export function dbQueryGet<T = Record<string, unknown>>(
   sql: string,
   params: unknown[] = []
 ): T | null {
-  const dbPath = resolveDbPath();
-  ensureDatabaseInitialized(dbPath);
-
-  const out = execFileSync(
-    "python3",
-    ["-c", PYTHON_SQLITE_BRIDGE, dbPath, "get", sql, JSON.stringify(params)],
-    { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-  );
-  const parsed = JSON.parse(out.trim()) as { ok: boolean; row: T | null };
-  return parsed.row ?? null;
+  return (getConnection().prepare(sql).get(...params) as T | undefined) ?? null;
 }
 
 export function dbExecute(sql: string, params: unknown[] = []): number {
-  const dbPath = resolveDbPath();
-  ensureDatabaseInitialized(dbPath);
-
-  const out = execFileSync(
-    "python3",
-    ["-c", PYTHON_SQLITE_BRIDGE, dbPath, "run", sql, JSON.stringify(params)],
-    { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-  );
-  const parsed = JSON.parse(out.trim()) as { ok: boolean; changes: number };
-  return parsed.changes || 0;
+  return getConnection().prepare(sql).run(...params).changes;
 }

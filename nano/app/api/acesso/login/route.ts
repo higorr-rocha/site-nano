@@ -76,7 +76,8 @@ export async function POST(req: NextRequest) {
     });
 
     return res;
-  } catch {
+  } catch (error) {
+    console.error("Login route failed:", error);
     return signedJsonResponse({ ok: false, error: "Erro interno na autenticação." }, 400);
   }
 }
