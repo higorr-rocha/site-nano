@@ -111,7 +111,7 @@ export default function Home() {
                 href="/contato"
                 className="inline-flex items-center gap-3 rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
               >
-                Entrar em contato <span className="text-lg">→</span>
+                Entrar em contato
               </Link>
               <a
                 href="https://api.whatsapp.com/send?phone=5505516982100266"
@@ -144,7 +144,7 @@ export default function Home() {
               href="/certificacoes"
               className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#FF8200] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
             >
-              Saiba mais <span>→</span>
+              Saiba mais
             </Link>
           </article>
 
@@ -164,7 +164,7 @@ export default function Home() {
               href="/empresa"
               className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#FF8200] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
             >
-              Saiba mais <span>→</span>
+              Saiba mais
             </Link>
           </article>
         </div>

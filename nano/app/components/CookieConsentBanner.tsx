@@ -60,27 +60,19 @@ export default function CookieConsentBanner() {
   const [gaGranted, setGaGranted] = useState(false);
 
   useEffect(() => {
-    let timer: number | undefined;
-
     try {
       const saved = localStorage.getItem("nanoquimica_cookie_consent_v2");
       if (!saved) {
-        timer = window.setTimeout(() => setIsVisible(true), 0);
+        setIsVisible(true);
       } else {
         const parsed = JSON.parse(saved) as { analyticsAccepted?: boolean };
         if (parsed.analyticsAccepted) {
-          timer = window.setTimeout(() => setGaGranted(true), 0);
+          setGaGranted(true);
         }
       }
     } catch {
-      timer = window.setTimeout(() => setIsVisible(true), 0);
+      setIsVisible(true);
     }
-
-    return () => {
-      if (timer !== undefined) {
-        window.clearTimeout(timer);
-      }
-    };
   }, []);
 
   const persistConsent = async (mode: "all" | "reject" | "custom") => {

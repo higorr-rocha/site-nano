@@ -43,7 +43,7 @@ export default function AcucarPage() {
               </div>
               <div className="flex flex-1 flex-col justify-between p-5">
                 <h2 className="text-base font-bold leading-6">{title}</h2>
-                <span className="mt-3 inline-flex text-sm font-bold text-[#FF8200]">Ver produto →</span>
+
               </div>
             </Link>
           ))}

@@ -91,22 +91,19 @@ export default function EmpresaPage() {
 
           <div className="grid gap-5 md:grid-cols-3">
             <article className="rounded-2xl bg-[#f5f2eb] p-8">
-              <p className="text-5xl font-black text-[#FF8200]">01</p>
-              <h3 className="mt-10 text-2xl font-bold">Missão</h3>
+              <h3 className="text-2xl font-bold">Missão</h3>
               <p className="mt-4 leading-7 text-slate-600">
                 Nosso objetivo futuro é nos posicionarmos como uma empresa líder no mercado, oferecendo soluções eficientes e completas para o agro. Queremos ser reconhecidos como uma marca de referência, capaz de oferecer inovação e qualidade em nossos produtos e serviços, sempre buscando atender às necessidades dos clientes e contribuir para melhores resultados no campo.
               </p>
             </article>
             <article className="rounded-2xl bg-[#24298D] p-8 text-white">
-              <p className="text-5xl font-black text-[#FF8200]">02</p>
-              <h3 className="mt-10 text-2xl font-bold">Visão</h3>
+              <h3 className="text-2xl font-bold">Visão</h3>
               <p className="mt-4 leading-7 text-white/80">
                 Acreditamos que o crescimento da empresa está diretamente relacionado ao desenvolvimento dos nossos colaboradores. Por isso, buscamos oferecer um ambiente que favoreça o desenvolvimento de habilidades e conhecimentos, promovendo continuamente o aprendizado, a capacitação e o crescimento da nossa equipe.
               </p>
             </article>
             <article className="rounded-2xl bg-[#FF8200] p-8 text-white">
-              <p className="text-5xl font-black text-white/80">03</p>
-              <h3 className="mt-10 text-2xl font-bold">Valores</h3>
+              <h3 className="text-2xl font-bold">Valores</h3>
               <p className="mt-4 leading-7 text-white">
                 Nossa cultura organizacional é pautada pela ética, honestidade e eficiência em todas as nossas ações. Valorizamos a integridade em nossas relações com clientes, parceiros e colaboradores, buscando sempre qualidade, responsabilidade e melhoria contínua.
               </p>

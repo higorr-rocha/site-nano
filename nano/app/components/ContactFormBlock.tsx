@@ -47,11 +47,7 @@ export default function ContactFormBlock() {
   };
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void fetchChallenge();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
+    fetchChallenge();
   }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -248,7 +244,7 @@ export default function ContactFormBlock() {
               disabled={loading}
               className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85 disabled:opacity-60"
             >
-              {loading ? "Enviando..." : "Enviar mensagem"} <span className="ml-3 text-xl">→</span>
+              {loading ? "Enviando..." : "Enviar mensagem"}
             </button>
           </form>
         )}

@@ -33,7 +33,11 @@ yarn-error.log*
 # env files (segredos e chaves de segurança nunca devem ser versionados)
 .env
 .env.*
-!.env.example
+.env.example
+
+# local editor and uploaded files
+/.vscode/
+/storage/
 
 # database local
 /database/*.sqlite

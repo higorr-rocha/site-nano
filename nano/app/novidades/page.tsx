@@ -56,7 +56,7 @@ export default function NovidadesPage() {
               href="/novidades/curiosidades-sobre-o-acido-fosforico-purificado"
               className="mt-7 inline-flex items-center gap-3 rounded-full bg-[#FF8200] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
             >
-              VER MAIS <span>→</span>
+              VER MAIS
             </Link>
           </div>
         </article>

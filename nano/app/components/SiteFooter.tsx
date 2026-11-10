@@ -63,29 +63,30 @@ export default function SiteFooter() {
             <h2 className="text-sm font-black uppercase tracking-[0.16em] text-[#FF8200]">
               Seções
             </h2>
-            <div className="mt-3 grid grid-cols-2 gap-x-5 gap-y-1 text-left text-xs leading-5 sm:text-sm">
-              <Link href="/" className="text-white/80 transition-colors hover:text-[#FF8200]">
+            {/* Posicionamento fixo: mobile translate-x-8; PC translate-x-10; colunas aproximadas. */}
+            <div className="mx-auto mt-3 grid w-fit translate-x-8 grid-cols-2 gap-x-0 gap-y-1 text-left text-xs leading-5 sm:translate-x-10 sm:text-sm [&>:nth-child(even)]:-translate-x-8">
+              <Link href="/" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Início
               </Link>
-              <Link href="/certificacoes" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/certificacoes" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Certificações
               </Link>
-              <Link href="/empresa" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/empresa" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Empresa
               </Link>
-              <Link href="/novidades" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/novidades" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Novidades
               </Link>
-              <Link href="/solucoes" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/solucoes" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Soluções
               </Link>
-              <Link href="/trabalhe-conosco" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/trabalhe-conosco" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Trabalhe Conosco
               </Link>
-              <Link href="/contato" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/contato" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Contato
               </Link>
-              <Link href="/politica-de-privacidade" className="text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/politica-de-privacidade" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Privacidade
               </Link>
             </div>

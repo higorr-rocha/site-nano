@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FaDownload, FaEnvelope } from "react-icons/fa6";
 import type { RoleScope } from "../lib/security";
 import type {
   ContactSubmission,
@@ -33,13 +33,11 @@ export default function PainelClient({
   accessDeniedNotice,
   data,
 }: PainelClientProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<RoleScope>(initialSection);
 
   const handleLogout = async () => {
-    await fetch("/api/acesso/logout", { method: "POST" });
-    router.push("/acesso/login");
-    router.refresh();
+    await fetch("/api/acesso/logout", { method: "POST", cache: "no-store" });
+    window.location.href = "/acesso/login";
   };
 
   const canContacts = user.scopes.includes("contatos");
@@ -54,21 +52,20 @@ export default function PainelClient({
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#FF8200]">
-              Painel Administrativo Seguro • /acesso
+              Painel Administrativo
             </p>
             <h1 className="mt-1 text-2xl font-black sm:text-3xl">{user.name}</h1>
             <p className="mt-1 text-xs text-white/80">
-              Conta autenticada: <strong>{user.email}</strong> — Perfil:{" "}
-              <span className="text-[#FF8200]">{user.roleLabel}</span>
+              Conta autenticada: <strong>{user.email}</strong>
             </p>
           </div>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#FF8200] hover:border-[#FF8200]"
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-xs font-bold text-white transition-colors hover:border-[#FF8200] hover:bg-[#FF8200]"
           >
-            Encerrar sessão segura
+            Encerrar sessão
           </button>
         </div>
       </section>
@@ -159,9 +156,28 @@ export default function PainelClient({
                 <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-slate-700">
                   {c.mensagem}
                 </p>
-                <p className="mt-2 text-[11px] text-slate-400">
-                  Fingerprint de Origem (SHA-256): {c.fingerprintHash}
-                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[11px] text-slate-400">
+                    Fingerprint de Origem (SHA-256): {c.fingerprintHash}
+                  </p>
+                  <a
+                    href={`mailto:${c.email}?subject=${encodeURIComponent(
+                      `Retorno de Contato Nanoquímica - ${c.empresa}`
+                    )}&body=${encodeURIComponent(
+                      `Olá ${c.nome},
+
+Recebemos sua mensagem enviada pelo site da Nanoquímica:
+"${c.mensagem}"
+
+Atenciosamente,
+Equipe Nanoquímica`
+                    )}`}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#24298D] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#FF8200]"
+                  >
+                    <FaEnvelope className="h-3.5 w-3.5" aria-hidden="true" />
+                    Responder para {c.email}
+                  </a>
+                </div>
               </article>
             ))}
           </div>
@@ -201,17 +217,32 @@ export default function PainelClient({
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs">
                   <span className="font-black text-[#24298D]">Currículo Anexado:</span>
-                  <span className="font-semibold text-[#FF8200]">{job.arquivoNome}</span>
-                  <span className="text-slate-400">
-                    ({Math.round(job.arquivoTamanhoBytes / 1024)} KB • {job.arquivoMime})
-                  </span>
+                  <a
+                    href={`/api/acesso/curriculo/${job.id}`}
+                    download={job.arquivoNome}
+                    className="inline-flex items-center gap-2 font-bold text-[#FF8200] underline transition-colors hover:text-[#24298D]"
+                  >
+                    <FaDownload className="h-3.5 w-3.5" aria-hidden="true" />
+                    {job.arquivoNome}
+                  </a>
                 </div>
                 <p className="mt-3 rounded-xl bg-white p-4 text-sm leading-6 text-slate-700">
                   {job.mensagem}
                 </p>
-                <p className="mt-2 text-[11px] text-slate-400">
-                  Fingerprint de Origem (SHA-256): {job.fingerprintHash}
-                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[11px] text-slate-400">
+                    Fingerprint de Origem (SHA-256): {job.fingerprintHash}
+                  </p>
+                  <a
+                    href={`mailto:${job.email}?subject=${encodeURIComponent(
+                      `Processo Seletivo Nanoquímica - ${job.vaga}`
+                    )}`}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#24298D] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#FF8200]"
+                  >
+                    <FaEnvelope className="h-3.5 w-3.5" aria-hidden="true" />
+                    Responder para {job.email}
+                  </a>
+                </div>
               </article>
             ))}
           </div>

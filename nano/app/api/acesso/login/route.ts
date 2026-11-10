@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import {
   checkRateLimit,
   createSessionToken,
+  getClientIp,
   getClientIdentifier,
   getSessionCookieName,
   signedJsonResponse,
@@ -12,7 +13,7 @@ import {
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
-  const rl = checkRateLimit(`login_${clientId}`, 5, 15 * 60 * 1000, 15 * 60 * 1000);
+  const rl = checkRateLimit(`login_${clientId}`, 10, 15 * 60 * 1000, 15 * 60 * 1000);
   if (!rl.allowed) {
     return signedJsonResponse(
       {
@@ -39,7 +40,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const captchaOk = await verifyCloudflareTurnstile(body.turnstileToken);
+    const captchaOk = await verifyCloudflareTurnstile(
+      body.turnstileToken,
+      getClientIp(req),
+      "login"
+    );
     if (!captchaOk) {
       return signedJsonResponse(
         { ok: false, error: "Falha na verificação automática de segurança (Cloudflare Turnstile)." },

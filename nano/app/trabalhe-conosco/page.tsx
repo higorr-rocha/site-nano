@@ -104,11 +104,7 @@ export default function TrabalheConoscoPage() {
   };
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void fetchChallenge();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
+    fetchChallenge();
   }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -442,8 +438,7 @@ export default function TrabalheConoscoPage() {
                 disabled={loading}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85 disabled:opacity-60"
               >
-                {loading ? "Validando e enviando..." : "Enviar candidatura"}{" "}
-                <span className="ml-3 text-xl">→</span>
+                {loading ? "Validando e enviando..." : "Enviar candidatura"}
               </button>
             </form>
           )}

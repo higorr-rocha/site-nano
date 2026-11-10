@@ -1,5 +1,7 @@
 import crypto from "crypto";
-import { dbExecute, dbQueryAll } from "./db";
+import fs from "fs";
+import path from "path";
+import { dbExecute, dbQueryAll, dbQueryGet } from "./db";
 
 export interface ContactSubmission {
   id: string;
@@ -91,6 +93,8 @@ interface DbConsentRow {
   platform: string;
 }
 
+const PRIVATE_CV_DIR = path.join(process.cwd(), "storage", "curriculos");
+
 export function addContactSubmission(
   entry: Omit<ContactSubmission, "id" | "createdAt" | "status">
 ): ContactSubmission {
@@ -131,6 +135,23 @@ export function addJobSubmission(
   const createdAt = new Date().toISOString();
   const status = "Recebido";
 
+  // Save physical file into private storage directory (storage/curriculos/<id>_<arquivoNome>) outside public/
+  if (entry.arquivoBase64) {
+    try {
+      if (!fs.existsSync(PRIVATE_CV_DIR)) {
+        fs.mkdirSync(PRIVATE_CV_DIR, { recursive: true });
+      }
+      const rawB64 = entry.arquivoBase64.includes(",")
+        ? entry.arquivoBase64.split(",")[1]
+        : entry.arquivoBase64;
+      const fileBuffer = Buffer.from(rawB64, "base64");
+      const safeDiskName = `${id}_${entry.arquivoNome.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      fs.writeFileSync(path.join(PRIVATE_CV_DIR, safeDiskName), fileBuffer);
+    } catch {
+      // fallback to SQLite column arquivo_base64 if disk is read-only
+    }
+  }
+
   dbExecute(
     `INSERT INTO job_applications (id, created_at, nome, email, telefone, cidade, uf, vaga, mensagem, arquivo_nome, arquivo_mime, arquivo_tamanho_bytes, arquivo_base64, status, fingerprint_hash)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -159,6 +180,45 @@ export function addJobSubmission(
     createdAt,
     status,
   };
+}
+
+export function getJobResumeById(jobId: string): {
+  fileName: string;
+  mimeType: string;
+  buffer: Buffer;
+} | null {
+  const row = dbQueryGet<DbJobRow>(
+    "SELECT id, arquivo_nome, arquivo_mime, arquivo_base64 FROM job_applications WHERE id = ? LIMIT 1",
+    [jobId]
+  );
+  if (!row) return null;
+
+  // 1. Check private disk storage first (storage/curriculos/)
+  const diskCandidate = path.join(
+    PRIVATE_CV_DIR,
+    `${row.id}_${row.arquivo_nome.replace(/[^a-zA-Z0-9._-]/g, "_")}`
+  );
+  if (fs.existsSync(diskCandidate)) {
+    return {
+      fileName: row.arquivo_nome,
+      mimeType: row.arquivo_mime,
+      buffer: fs.readFileSync(diskCandidate),
+    };
+  }
+
+  // 2. Fallback to database BLOB/base64 column
+  if (row.arquivo_base64) {
+    const rawB64 = row.arquivo_base64.includes(",")
+      ? row.arquivo_base64.split(",")[1]
+      : row.arquivo_base64;
+    return {
+      fileName: row.arquivo_nome,
+      mimeType: row.arquivo_mime,
+      buffer: Buffer.from(rawB64, "base64"),
+    };
+  }
+
+  return null;
 }
 
 export function saveTelemetryConsent(

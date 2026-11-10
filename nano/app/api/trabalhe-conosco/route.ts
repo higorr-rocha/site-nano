@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
       arquivoNome: fileCheck.safeFileName!,
       arquivoMime: sanitizeStrictString(body.arquivoMime, 120),
       arquivoTamanhoBytes: fileCheck.sizeBytes!,
+      arquivoBase64: typeof body.arquivoBase64 === 'string' ? body.arquivoBase64 : undefined,
       fingerprintHash,
     });
 
