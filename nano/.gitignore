@@ -42,7 +42,9 @@ yarn-error.log*
 # database local
 /database/*.sqlite
 /database/*.sqlite-journal
+/database/*.sqlite-*
 /database/*.db
+/database/*.db-*
 
 # vercel
 .vercel
