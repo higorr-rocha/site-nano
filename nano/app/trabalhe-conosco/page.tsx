@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import SiteBreadcrumb from "../components/SiteBreadcrumb";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
@@ -9,6 +9,13 @@ const ufs = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
   "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
   "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+];
+
+const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
+const ALLOWED_MIMES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
 const jobs = [
@@ -56,10 +63,163 @@ const jobs = [
 
 export default function TrabalheConoscoPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [protocolo, setProtocolo] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [fileWarning, setFileWarning] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [uf, setUf] = useState("SP");
+  const [mensagem, setMensagem] = useState("");
+  const [selectedFile, setSelectedFile] = useState<{
+    name: string;
+    type: string;
+    size: number;
+    base64: string;
+  } | null>(null);
+
+  const [challenge, setChallenge] = useState<{
+    challengeNonce: string;
+    challengeTimestamp: number;
+    challengeSignature: string;
+  } | null>(null);
+
+  const fetchChallenge = async () => {
+    try {
+      const res = await fetch("/api/seguranca/desafio");
+      const data = await res.json();
+      if (data.ok) {
+        setChallenge({
+          challengeNonce: data.challengeNonce,
+          challengeTimestamp: data.challengeTimestamp,
+          challengeSignature: data.challengeSignature,
+        });
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchChallenge();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFileWarning("");
+    setErrorMsg("");
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const lowerName = file.name.toLowerCase();
+    const validExt = ALLOWED_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
+    const validMime = ALLOWED_MIMES.includes(file.type);
+
+    if (!validExt || !validMime) {
+      setSelectedFile(null);
+      e.target.value = "";
+      setFileWarning(
+        "Aviso: Formato de arquivo não permitido! O currículo deve estar exclusivamente nos formatos PDF (.pdf), DOC (.doc) ou DOCX (.docx)."
+      );
+      return;
+    }
+
+    if (file.size > 1024 * 1024) {
+      setSelectedFile(null);
+      e.target.value = "";
+      setFileWarning("Aviso: O arquivo selecionado excede o tamanho máximo permitido de 1MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSelectedFile({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        base64: typeof reader.result === "string" ? reader.result : "",
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMsg("");
+
+    if (!selectedFile) {
+      setFileWarning(
+        "Anexe um arquivo de currículo válido (.pdf, .doc ou .docx de até 1MB) antes de enviar."
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let activeChallenge = challenge;
+      if (!activeChallenge) {
+        const cRes = await fetch("/api/seguranca/desafio");
+        activeChallenge = await cRes.json();
+      }
+
+      let fingerprintHash = "";
+      try {
+        fingerprintHash = localStorage.getItem("nanoquimica_browser_fp") || "";
+      } catch {
+        // ignore
+      }
+
+      const res = await fetch("/api/trabalhe-conosco", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: String(nome),
+          email: String(email),
+          telefone: String(telefone),
+          cidade: String(cidade),
+          uf: String(uf),
+          mensagem: String(mensagem),
+          arquivoNome: selectedFile.name,
+          arquivoMime: selectedFile.type,
+          arquivoTamanhoBytes: selectedFile.size,
+          arquivoBase64: selectedFile.base64,
+          fingerprintHash,
+          challengeNonce: activeChallenge?.challengeNonce,
+          challengeTimestamp: activeChallenge?.challengeTimestamp,
+          challengeSignature: activeChallenge?.challengeSignature,
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.ok) {
+        setErrorMsg(result.error || "Não foi possível enviar sua candidatura.");
+        await fetchChallenge();
+      } else {
+        setProtocolo(result.protocolo || "");
+        setSubmitted(true);
+        setNome("");
+        setEmail("");
+        setTelefone("");
+        setCidade("");
+        setUf("SP");
+        setMensagem("");
+        setSelectedFile(null);
+        await fetchChallenge();
+      }
+    } catch {
+      setErrorMsg("Erro de conexão ao enviar sua candidatura. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -146,11 +306,29 @@ export default function TrabalheConoscoPage() {
             Em breve retornaremos o contato <span className="font-semibold text-[#FF8200]">*Campos obrigatórios</span>
           </p>
 
+          {fileWarning && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-amber-400 bg-amber-50 p-4 text-xs font-bold leading-5 text-amber-900"
+            >
+              {fileWarning}
+            </div>
+          )}
+
+          {errorMsg && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-xs font-bold leading-5 text-red-700"
+            >
+              {errorMsg}
+            </div>
+          )}
+
           {submitted ? (
             <div className="mt-6 rounded-xl bg-[#24298D]/5 p-6 text-sm leading-6 text-[#24298D]">
-              <p className="font-bold">Currículo enviado com sucesso!</p>
+              <p className="font-bold">Currículo enviado e registrado no painel administrativo!</p>
               <p className="mt-2 text-slate-600">
-                Em breve retornaremos o contato.
+                Sua candidatura foi armazenada com segurança para avaliação do RH ({protocolo ? `Protocolo: ${protocolo}` : "Registrado"}).
               </p>
               <button
                 type="button"
@@ -168,6 +346,9 @@ export default function TrabalheConoscoPage() {
                   <input
                     type="text"
                     required
+                    maxLength={120}
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
                     placeholder="Nome*"
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                   />
@@ -177,6 +358,9 @@ export default function TrabalheConoscoPage() {
                   <input
                     type="email"
                     required
+                    maxLength={120}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email*"
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                   />
@@ -188,6 +372,9 @@ export default function TrabalheConoscoPage() {
                   <label className="mb-1 block text-xs font-bold text-[#24298D]">Telefone</label>
                   <input
                     type="tel"
+                    maxLength={40}
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
                     placeholder="Telefone"
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                   />
@@ -196,6 +383,9 @@ export default function TrabalheConoscoPage() {
                   <label className="mb-1 block text-xs font-bold text-[#24298D]">Cidade</label>
                   <input
                     type="text"
+                    maxLength={80}
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
                     placeholder="Cidade"
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                   />
@@ -203,12 +393,13 @@ export default function TrabalheConoscoPage() {
                 <div>
                   <label className="mb-1 block text-xs font-bold text-[#24298D]">Estado (UF)</label>
                   <select
-                    defaultValue="SP"
+                    value={uf}
+                    onChange={(e) => setUf(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                   >
-                    {ufs.map((uf) => (
-                      <option key={uf} value={uf}>
-                        {uf}
+                    {ufs.map((itemUf) => (
+                      <option key={itemUf} value={itemUf}>
+                        {itemUf}
                       </option>
                     ))}
                   </select>
@@ -217,14 +408,20 @@ export default function TrabalheConoscoPage() {
 
               <div>
                 <label className="mb-1 block text-xs font-bold text-[#24298D]">
-                  Currículo* (Tamanho máximo: 1MB)
+                  Currículo* (Apenas PDF, DOC ou DOCX — Tamanho máximo: 1MB)
                 </label>
                 <input
                   type="file"
                   required
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleFileChange}
                   className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-2.5 text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-[#24298D] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#FF8200]"
                 />
+                {selectedFile && (
+                  <p className="mt-1.5 text-xs font-semibold text-emerald-700">
+                    Arquivo validado: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
+                  </p>
+                )}
               </div>
 
               <div>
@@ -232,6 +429,9 @@ export default function TrabalheConoscoPage() {
                 <textarea
                   required
                   rows={4}
+                  maxLength={2000}
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
                   placeholder="Mensagem*"
                   className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                 />
@@ -239,9 +439,11 @@ export default function TrabalheConoscoPage() {
 
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85 disabled:opacity-60"
               >
-                Enviar candidatura <span className="ml-3 text-xl">→</span>
+                {loading ? "Validando e enviando..." : "Enviar candidatura"}{" "}
+                <span className="ml-3 text-xl">→</span>
               </button>
             </form>
           )}

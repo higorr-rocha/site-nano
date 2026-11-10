@@ -63,7 +63,7 @@ export default function SiteFooter() {
             <h2 className="text-sm font-black uppercase tracking-[0.16em] text-[#FF8200]">
               Seções
             </h2>
-            <div className="mx-auto mt-3 grid w-fit translate-x-3 grid-cols-2 gap-x-0 gap-y-1 text-left text-xs leading-5 sm:text-sm lg:translate-x-6">
+            <div className="mt-3 grid grid-cols-2 gap-x-5 gap-y-1 text-left text-xs leading-5 sm:text-sm">
               <Link href="/" className="text-white/80 transition-colors hover:text-[#FF8200]">
                 Início
               </Link>
@@ -79,7 +79,7 @@ export default function SiteFooter() {
               <Link href="/solucoes" className="text-white/80 transition-colors hover:text-[#FF8200]">
                 Soluções
               </Link>
-              <Link href="/trabalhe-conosco" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
+              <Link href="/trabalhe-conosco" className="text-white/80 transition-colors hover:text-[#FF8200]">
                 Trabalhe Conosco
               </Link>
               <Link href="/contato" className="text-white/80 transition-colors hover:text-[#FF8200]">
@@ -118,6 +118,7 @@ export default function SiteFooter() {
 
         <div className="mt-6 flex flex-col items-center gap-2 border-t border-white/20 pt-4 text-xs text-white/60 sm:flex-row sm:justify-center sm:gap-6">
           <p>© 2026 Nanoquímica. Soluções que movem a indústria.</p>
+          <Link href="/acesso" className="text-white/50 transition-colors hover:text-[#FF8200]">Área de Acesso</Link>
           <p>Ciência, parceria e conhecimento.</p>
         </div>
       </div>

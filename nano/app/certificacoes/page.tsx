@@ -104,6 +104,9 @@ export default function CertificacoesPage() {
               <div>
                 <div className="flex items-center justify-between">
                   <span className="text-4xl font-black text-[#FF8200]">{cert.number}</span>
+                  <span className="rounded-full bg-[#24298D]/10 px-3 py-1 text-[11px] font-bold text-[#24298D]">
+                    Vigente
+                  </span>
                 </div>
                 <h2 className="mt-6 text-lg font-black leading-snug text-[#24298D]">
                   {cert.title}

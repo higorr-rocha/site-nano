@@ -30,8 +30,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (segredos e chaves de segurança nunca devem ser versionados)
+.env
+.env.*
+!.env.example
+
+# database local
+/database/*.sqlite
+/database/*.sqlite-journal
+/database/*.db
 
 # vercel
 .vercel

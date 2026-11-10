@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const ufs = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -12,10 +12,106 @@ const MAPS_URL = "https://www.google.com/maps?saddr=My+Location&daddr=Rua+Rua+Al
 
 export default function ContactFormBlock() {
   const [submitted, setSubmitted] = useState(false);
+  const [protocolo, setProtocolo] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const [nome, setNome] = useState("");
+  const [empresa, setEmpresa] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [uf, setUf] = useState("SP");
+  const [mensagem, setMensagem] = useState("");
+
+  const [challenge, setChallenge] = useState<{
+    challengeNonce: string;
+    challengeTimestamp: number;
+    challengeSignature: string;
+  } | null>(null);
+
+  const fetchChallenge = async () => {
+    try {
+      const res = await fetch("/api/seguranca/desafio");
+      const data = await res.json();
+      if (data.ok) {
+        setChallenge({
+          challengeNonce: data.challengeNonce,
+          challengeTimestamp: data.challengeTimestamp,
+          challengeSignature: data.challengeSignature,
+        });
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchChallenge();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMsg("");
+    setLoading(true);
+
+    try {
+      let activeChallenge = challenge;
+      if (!activeChallenge) {
+        const cRes = await fetch("/api/seguranca/desafio");
+        activeChallenge = await cRes.json();
+      }
+
+      let fingerprintHash = "";
+      try {
+        fingerprintHash = localStorage.getItem("nanoquimica_browser_fp") || "";
+      } catch {
+        // ignore
+      }
+
+      const res = await fetch("/api/contato", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: String(nome),
+          empresa: String(empresa),
+          email: String(email),
+          telefone: String(telefone),
+          cidade: String(cidade),
+          uf: String(uf),
+          mensagem: String(mensagem),
+          fingerprintHash,
+          challengeNonce: activeChallenge?.challengeNonce,
+          challengeTimestamp: activeChallenge?.challengeTimestamp,
+          challengeSignature: activeChallenge?.challengeSignature,
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.ok) {
+        setErrorMsg(result.error || "Não foi possível enviar sua mensagem.");
+        await fetchChallenge();
+      } else {
+        setProtocolo(result.protocolo || "");
+        setSubmitted(true);
+        setNome("");
+        setEmpresa("");
+        setEmail("");
+        setTelefone("");
+        setCidade("");
+        setUf("SP");
+        setMensagem("");
+        await fetchChallenge();
+      }
+    } catch {
+      setErrorMsg("Erro de comunicação com o servidor. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,11 +127,17 @@ export default function ContactFormBlock() {
           Em breve retornaremos o contato <span className="font-semibold text-[#FF8200]">*Campos obrigatórios</span>
         </p>
 
+        {errorMsg && (
+          <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-xs font-bold text-red-700">
+            {errorMsg}
+          </div>
+        )}
+
         {submitted ? (
           <div className="mt-6 rounded-xl bg-[#24298D]/5 p-6 text-sm leading-6 text-[#24298D]">
-            <p className="font-bold">Mensagem enviada com sucesso!</p>
+            <p className="font-bold">Mensagem enviada e registrada no painel administrativo!</p>
             <p className="mt-2 text-slate-600">
-              Em breve retornaremos o contato.
+              Seus dados foram encaminhados com segurança para a seção de Contatos ({protocolo ? `Protocolo: ${protocolo}` : "Registrado"}).
             </p>
             <button
               type="button"
@@ -53,8 +155,11 @@ export default function ContactFormBlock() {
                 <input
                   type="text"
                   required
+                  maxLength={120}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
                   placeholder="Nome*"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 />
               </div>
               <div>
@@ -62,8 +167,11 @@ export default function ContactFormBlock() {
                 <input
                   type="text"
                   required
+                  maxLength={120}
+                  value={empresa}
+                  onChange={(e) => setEmpresa(e.target.value)}
                   placeholder="Empresa*"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 />
               </div>
             </div>
@@ -74,16 +182,22 @@ export default function ContactFormBlock() {
                 <input
                   type="email"
                   required
+                  maxLength={120}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email*"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-bold text-[#24298D]">Telefone</label>
                 <input
                   type="tel"
+                  maxLength={40}
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
                   placeholder="Telefone"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 />
               </div>
             </div>
@@ -93,19 +207,23 @@ export default function ContactFormBlock() {
                 <label className="mb-1 block text-xs font-bold text-[#24298D]">Cidade</label>
                 <input
                   type="text"
+                  maxLength={80}
+                  value={cidade}
+                  onChange={(e) => setCidade(e.target.value)}
                   placeholder="Cidade"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-bold text-[#24298D]">Estado (UF)</label>
                 <select
-                  defaultValue="SP"
-                  className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                  value={uf}
+                  onChange={(e) => setUf(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
                 >
-                  {ufs.map((uf) => (
-                    <option key={uf} value={uf}>
-                      {uf}
+                  {ufs.map((itemUf) => (
+                    <option key={itemUf} value={itemUf}>
+                      {itemUf}
                     </option>
                   ))}
                 </select>
@@ -117,16 +235,20 @@ export default function ContactFormBlock() {
               <textarea
                 required
                 rows={4}
+                maxLength={2000}
+                value={mensagem}
+                onChange={(e) => setMensagem(e.target.value)}
                 placeholder="Mensagem*"
-                className="w-full rounded-xl border border-slate-200 bg-[#f7f9fc] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
+                className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
               />
             </div>
 
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85"
+              disabled={loading}
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#FF8200] px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-[#FF8200]/85 disabled:opacity-60"
             >
-              Enviar mensagem <span className="ml-3 text-xl">→</span>
+              {loading ? "Enviando..." : "Enviar mensagem"} <span className="ml-3 text-xl">→</span>
             </button>
           </form>
         )}
@@ -183,7 +305,7 @@ export default function ContactFormBlock() {
             Excelência Técnica
           </p>
           <p className="mt-1 text-sm font-semibold text-white">
-            Use Nano, a Nano resolve.
+            Nanoquímica. Use Nano, a Nano resolve.
           </p>
         </div>
       </div>
