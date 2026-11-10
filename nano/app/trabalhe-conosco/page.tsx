@@ -4,6 +4,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import SiteBreadcrumb from "../components/SiteBreadcrumb";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { availableJobTitles } from "../lib/job-openings";
 
 const ufs = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -73,6 +74,7 @@ export default function TrabalheConoscoPage() {
   const [telefone, setTelefone] = useState("");
   const [cidade, setCidade] = useState("");
   const [uf, setUf] = useState("SP");
+  const [selectedJob, setSelectedJob] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
@@ -104,7 +106,11 @@ export default function TrabalheConoscoPage() {
   };
 
   useEffect(() => {
-    fetchChallenge();
+    const timer = window.setTimeout(() => {
+      void fetchChallenge();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -159,6 +165,11 @@ export default function TrabalheConoscoPage() {
       return;
     }
 
+    if (!selectedJob) {
+      setErrorMsg("Selecione a vaga para a qual deseja se candidatar.");
+      return;
+    }
+
     setLoading(true);
     try {
       let activeChallenge = challenge;
@@ -183,6 +194,7 @@ export default function TrabalheConoscoPage() {
           telefone: String(telefone),
           cidade: String(cidade),
           uf: String(uf),
+          vaga: selectedJob,
           mensagem: String(mensagem),
           arquivoNome: selectedFile.name,
           arquivoMime: selectedFile.type,
@@ -207,6 +219,7 @@ export default function TrabalheConoscoPage() {
         setTelefone("");
         setCidade("");
         setUf("SP");
+        setSelectedJob("");
         setMensagem("");
         setSelectedFile(null);
         await fetchChallenge();
@@ -402,22 +415,43 @@ export default function TrabalheConoscoPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">
-                  Currículo* (Apenas PDF, DOC ou DOCX — Tamanho máximo: 1MB)
-                </label>
-                <input
-                  type="file"
-                  required
-                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  onChange={handleFileChange}
-                  className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-2.5 text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-[#24298D] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#FF8200]"
-                />
-                {selectedFile && (
-                  <p className="mt-1.5 text-xs font-semibold text-emerald-700">
-                    Arquivo validado: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
-                  </p>
-                )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Currículo* (PDF, DOC ou DOCX — máximo: 1MB)
+                  </label>
+                  <input
+                    type="file"
+                    required
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    onChange={handleFileChange}
+                    className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-3 py-2 text-xs text-slate-600 file:mr-2 file:rounded-full file:border-0 file:bg-[#24298D] file:px-3 file:py-1.5 file:text-[11px] file:font-bold file:text-white hover:file:bg-[#FF8200]"
+                  />
+                  {selectedFile && (
+                    <p className="mt-1.5 text-xs font-semibold text-emerald-700">
+                      Arquivo validado: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Vaga pretendida*
+                  </label>
+                  <select
+                    required
+                    value={selectedJob}
+                    onChange={(e) => setSelectedJob(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
+                  >
+                    <option value="">Selecione uma vaga</option>
+                    {availableJobTitles.map((jobTitle) => (
+                      <option key={jobTitle} value={jobTitle}>
+                        {jobTitle}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>

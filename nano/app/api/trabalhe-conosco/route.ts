@@ -9,6 +9,7 @@ import {
   verifySignedChallenge,
 } from "../../lib/security";
 import { addJobSubmission } from "../../lib/store";
+import { isAvailableJobTitle } from "../../lib/job-openings";
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
@@ -44,15 +45,19 @@ export async function POST(req: NextRequest) {
     const telefone = sanitizeStrictString(body.telefone, 40);
     const cidade = sanitizeStrictString(body.cidade, 80);
     const uf = sanitizeStrictString(body.uf, 4).toUpperCase();
-    const vaga = sanitizeStrictString(body.vaga, 120) || "Banco de Talentos / Geral";
+    const vaga = sanitizeStrictString(body.vaga, 120);
     const mensagem = sanitizeStrictString(body.mensagem, 2000);
     const fingerprintHash = sanitizeStrictString(body.fingerprintHash, 64) || clientId;
 
-    if (!nome || !email || !mensagem) {
+    if (!nome || !email || !vaga || !mensagem) {
       return signedJsonResponse(
-        { ok: false, error: "Preencha todos os campos obrigatórios (Nome, Email, Currículo e Mensagem)." },
+        { ok: false, error: "Preencha todos os campos obrigatórios (Nome, Email, Vaga, Currículo e Mensagem)." },
         400
       );
+    }
+
+    if (!isAvailableJobTitle(vaga)) {
+      return signedJsonResponse({ ok: false, error: "A vaga selecionada não está disponível." }, 400);
     }
 
     if (!isValidEmail(email)) {
