@@ -6,14 +6,8 @@ let connection: Database.Database | null = null;
 
 function resolveDbPath(): string {
   const configured = process.env.NANO_DB_PATH;
-  if (configured) {
-    if (path.isAbsolute(configured) || process.env.NODE_ENV !== "production") {
-      return path.isAbsolute(configured)
-        ? configured
-        : path.join(process.cwd(), configured);
-    }
-
-    return path.join("/tmp", path.basename(configured));
+  if (configured && path.isAbsolute(configured)) {
+    return configured;
   }
 
   return process.env.NODE_ENV === "production"
