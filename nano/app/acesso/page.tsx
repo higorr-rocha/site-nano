@@ -12,10 +12,10 @@ export default async function AcessoRootPage() {
   const session = verifySessionToken(token);
 
   if (!session) {
-    redirect("/acesso/login");
+    redirect("/acesso/login?bloqueado=1");
   }
 
-  const data = getStoreDataForScopes(session.scopes);
+  const data = await getStoreDataForScopes(session.scopes);
   const defaultSection = session.scopes[0] || "contatos";
 
   return (

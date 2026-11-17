@@ -93,13 +93,13 @@ export default function EmpresaPage() {
             <article className="rounded-2xl bg-[#f5f2eb] p-8">
               <h3 className="text-2xl font-bold">Missão</h3>
               <p className="mt-4 leading-7 text-slate-600">
-                Nosso objetivo futuro é nos posicionarmos como uma empresa líder no mercado, oferecendo soluções eficientes e completas para o agro. Queremos ser reconhecidos como uma marca de referência, capaz de oferecer inovação e qualidade em nossos produtos e serviços, sempre buscando atender às necessidades dos clientes e contribuir para melhores resultados no campo.
+                Acreditamos que o crescimento da empresa está diretamente relacionado ao desenvolvimento dos nossos colaboradores e à eficiência entregue aos clientes. Por isso, buscamos oferecer soluções químicas de excelência e um ambiente que favoreça o desenvolvimento de habilidades e conhecimentos, promovendo continuamente o aprendizado, a capacitação e o crescimento da nossa equipe.
               </p>
             </article>
             <article className="rounded-2xl bg-[#24298D] p-8 text-white">
               <h3 className="text-2xl font-bold">Visão</h3>
               <p className="mt-4 leading-7 text-white/80">
-                Acreditamos que o crescimento da empresa está diretamente relacionado ao desenvolvimento dos nossos colaboradores. Por isso, buscamos oferecer um ambiente que favoreça o desenvolvimento de habilidades e conhecimentos, promovendo continuamente o aprendizado, a capacitação e o crescimento da nossa equipe.
+                Nosso objetivo futuro é nos posicionarmos como uma empresa líder no mercado, oferecendo soluções eficientes e completas para o agro. Queremos ser reconhecidos como uma marca de referência, capaz de oferecer inovação e qualidade em nossos produtos e serviços, sempre buscando atender às necessidades dos clientes e contribuir para melhores resultados no campo.
               </p>
             </article>
             <article className="rounded-2xl bg-[#FF8200] p-8 text-white">

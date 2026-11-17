@@ -49,7 +49,7 @@ export default function NovidadesPage() {
             <h2 className="text-2xl font-black leading-tight tracking-[-0.03em] text-[#24298D] sm:text-3xl">
               Curiosidades sobre o ácido fosfórico purificado
             </h2>
-            <p className="mt-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+            <p className="mt-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
               Confira algumas curiosidades a respeito do ácido fosfórico purificado e compreenda de que maneira a clarificação do caldo com NanoPhós Purificado melhora a qualidade e a produtividade da sua usina.
             </p>
             <Link

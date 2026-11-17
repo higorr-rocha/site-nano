@@ -14,7 +14,7 @@ export async function GET(
   }
 
   const { id } = await context.params;
-  const resume = getJobResumeById(id);
+  const resume = await getJobResumeById(id);
 
   if (!resume) {
     return new NextResponse("Currículo não encontrado.", { status: 404 });

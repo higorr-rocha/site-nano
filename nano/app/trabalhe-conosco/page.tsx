@@ -1,10 +1,21 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import Script from "next/script";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
+import { syncTelemetryConsentOnFormSubmit } from "../components/CookieConsentBanner";
 import SiteBreadcrumb from "../components/SiteBreadcrumb";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { availableJobTitles } from "../lib/job-openings";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 const ufs = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -83,6 +94,10 @@ export default function TrabalheConoscoPage() {
     base64: string;
   } | null>(null);
 
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileToken = useRef<string | null>(null);
+
   const [challenge, setChallenge] = useState<{
     challengeNonce: string;
     challengeTimestamp: number;
@@ -91,27 +106,65 @@ export default function TrabalheConoscoPage() {
 
   const fetchChallenge = async () => {
     try {
-      const res = await fetch("/api/seguranca/desafio");
+      const res = await fetch(`/api/seguranca/desafio?t=${Date.now()}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
       if (data.ok) {
-        setChallenge({
+        const nextChallenge = {
           challengeNonce: data.challengeNonce,
           challengeTimestamp: data.challengeTimestamp,
           challengeSignature: data.challengeSignature,
-        });
+        };
+        setChallenge(nextChallenge);
+        return nextChallenge;
       }
     } catch {
       // ignore
     }
+    return null;
   };
+
+  const initializeTurnstile = useCallback(() => {
+    if (
+      !TURNSTILE_SITE_KEY ||
+      typeof window === "undefined" ||
+      !window.turnstile ||
+      !turnstileContainerRef.current ||
+      turnstileWidgetId.current
+    ) {
+      return;
+    }
+
+    turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      action: "career",
+      callback: (token) => {
+        turnstileToken.current = token;
+      },
+      "expired-callback": () => {
+        turnstileToken.current = null;
+      },
+      "error-callback": () => {
+        turnstileToken.current = null;
+      },
+    });
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void fetchChallenge();
+      initializeTurnstile();
     }, 0);
 
-    return () => window.clearTimeout(timer);
-  }, []);
+    return () => {
+      window.clearTimeout(timer);
+      if (turnstileWidgetId.current && typeof window !== "undefined" && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [initializeTurnstile]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFileWarning("");
@@ -135,7 +188,7 @@ export default function TrabalheConoscoPage() {
       return;
     }
 
-    if (file.size > 1024 * 1024) {
+    if (file.size <= 0 || file.size > 1024 * 1024) {
       setSelectedFile(null);
       e.target.value = "";
       setFileWarning("Aviso: O arquivo selecionado excede o tamanho máximo permitido de 1MB.");
@@ -158,7 +211,7 @@ export default function TrabalheConoscoPage() {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!selectedFile) {
+    if (!selectedFile || !selectedFile.base64) {
       setFileWarning(
         "Anexe um arquivo de currículo válido (.pdf, .doc ou .docx de até 1MB) antes de enviar."
       );
@@ -172,18 +225,8 @@ export default function TrabalheConoscoPage() {
 
     setLoading(true);
     try {
-      let activeChallenge = challenge;
-      if (!activeChallenge) {
-        const cRes = await fetch("/api/seguranca/desafio");
-        activeChallenge = await cRes.json();
-      }
-
-      let fingerprintHash = "";
-      try {
-        fingerprintHash = localStorage.getItem("nanoquimica_browser_fp") || "";
-      } catch {
-        // ignore
-      }
+      const activeChallenge = (await fetchChallenge()) || challenge;
+      const fingerprintHash = await syncTelemetryConsentOnFormSubmit();
 
       const res = await fetch("/api/trabalhe-conosco", {
         method: "POST",
@@ -201,6 +244,7 @@ export default function TrabalheConoscoPage() {
           arquivoTamanhoBytes: selectedFile.size,
           arquivoBase64: selectedFile.base64,
           fingerprintHash,
+          turnstileToken: turnstileToken.current || "",
           challengeNonce: activeChallenge?.challengeNonce,
           challengeTimestamp: activeChallenge?.challengeTimestamp,
           challengeSignature: activeChallenge?.challengeSignature,
@@ -210,6 +254,9 @@ export default function TrabalheConoscoPage() {
       const result = await res.json();
       if (!res.ok || !result.ok) {
         setErrorMsg(result.error || "Não foi possível enviar sua candidatura.");
+        if (turnstileWidgetId.current && window.turnstile) {
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
         await fetchChallenge();
       } else {
         setProtocolo(result.protocolo || "");
@@ -222,6 +269,9 @@ export default function TrabalheConoscoPage() {
         setSelectedJob("");
         setMensagem("");
         setSelectedFile(null);
+        if (turnstileWidgetId.current && window.turnstile) {
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
         await fetchChallenge();
       }
     } catch {
@@ -233,6 +283,13 @@ export default function TrabalheConoscoPage() {
 
   return (
     <main className="min-h-screen bg-[#f5f2eb] pt-20 text-[#24298D]">
+      {TURNSTILE_SITE_KEY && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+          onLoad={initializeTurnstile}
+        />
+      )}
       <SiteHeader activePage="trabalhe-conosco" />
       <SiteBreadcrumb
         items={[
@@ -351,8 +408,11 @@ export default function TrabalheConoscoPage() {
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">Nome*</label>
+                  <label htmlFor="rh-nome" className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Nome*
+                  </label>
                   <input
+                    id="rh-nome"
                     type="text"
                     required
                     maxLength={120}
@@ -363,8 +423,11 @@ export default function TrabalheConoscoPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">Email*</label>
+                  <label htmlFor="rh-email" className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Email*
+                  </label>
                   <input
+                    id="rh-email"
                     type="email"
                     required
                     maxLength={120}
@@ -378,8 +441,11 @@ export default function TrabalheConoscoPage() {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">Telefone</label>
+                  <label htmlFor="rh-telefone" className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Telefone
+                  </label>
                   <input
+                    id="rh-telefone"
                     type="tel"
                     maxLength={40}
                     value={telefone}
@@ -389,8 +455,11 @@ export default function TrabalheConoscoPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">Cidade</label>
+                  <label htmlFor="rh-cidade" className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Cidade
+                  </label>
                   <input
+                    id="rh-cidade"
                     type="text"
                     maxLength={80}
                     value={cidade}
@@ -400,8 +469,11 @@ export default function TrabalheConoscoPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">Estado (UF)</label>
+                  <label htmlFor="rh-uf" className="mb-1 block text-xs font-bold text-[#24298D]">
+                    Estado (UF)
+                  </label>
                   <select
+                    id="rh-uf"
                     value={uf}
                     onChange={(e) => setUf(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
@@ -417,10 +489,11 @@ export default function TrabalheConoscoPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">
+                  <label htmlFor="rh-curriculo" className="mb-1 block text-xs font-bold text-[#24298D]">
                     Currículo* (PDF, DOC ou DOCX — máximo: 1MB)
                   </label>
                   <input
+                    id="rh-curriculo"
                     type="file"
                     required
                     accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -435,10 +508,11 @@ export default function TrabalheConoscoPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-[#24298D]">
+                  <label htmlFor="rh-vaga" className="mb-1 block text-xs font-bold text-[#24298D]">
                     Vaga pretendida*
                   </label>
                   <select
+                    id="rh-vaga"
                     required
                     value={selectedJob}
                     onChange={(e) => setSelectedJob(e.target.value)}
@@ -455,8 +529,11 @@ export default function TrabalheConoscoPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Mensagem*</label>
+                <label htmlFor="rh-mensagem" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Mensagem*
+                </label>
                 <textarea
+                  id="rh-mensagem"
                   required
                   rows={4}
                   maxLength={2000}
@@ -466,6 +543,8 @@ export default function TrabalheConoscoPage() {
                   className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none focus:border-[#FF8200]"
                 />
               </div>
+
+              <div ref={turnstileContainerRef} aria-hidden="true" />
 
               <button
                 type="submit"

@@ -1,8 +1,16 @@
 "use client";
 
 import Script from "next/script";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { syncTelemetryConsentOnFormSubmit } from "../../components/CookieConsentBanner";
 import SiteFooter from "../../components/SiteFooter";
 import SiteHeader from "../../components/SiteHeader";
 
@@ -27,6 +35,22 @@ declare global {
   interface Window {
     turnstile?: TurnstileApi;
   }
+}
+
+function BlockedAccessNotice() {
+  const searchParams = useSearchParams();
+  const isBlocked = searchParams.get("bloqueado") === "1";
+
+  if (!isBlocked) return null;
+
+  return (
+    <div
+      role="status"
+      className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs font-bold leading-5 text-amber-900"
+    >
+      Faça login com sua conta corporativa para acessar o painel administrativo.
+    </div>
+  );
 }
 
 export default function AcessoLoginPage() {
@@ -139,6 +163,7 @@ export default function AcessoLoginPage() {
     try {
       const captchaToken = getTurnstileToken();
       const activeChallenge = (await fetchFreshChallenge()) || challenge;
+      await syncTelemetryConsentOnFormSubmit();
 
       const res = await fetch("/api/acesso/login", {
         method: "POST",
@@ -196,6 +221,10 @@ export default function AcessoLoginPage() {
             Acesso Corporativo
           </h1>
 
+          <Suspense fallback={null}>
+            <BlockedAccessNotice />
+          </Suspense>
+
           {errorMsg && (
             <div
               role="alert"
@@ -207,10 +236,11 @@ export default function AcessoLoginPage() {
 
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-bold text-[#24298D]">
+              <label htmlFor="login-email" className="mb-1 block text-xs font-bold text-[#24298D]">
                 E-mail Corporativo
               </label>
               <input
+                id="login-email"
                 type="email"
                 required
                 autoComplete="username"
@@ -223,10 +253,11 @@ export default function AcessoLoginPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-bold text-[#24298D]">
+              <label htmlFor="login-password" className="mb-1 block text-xs font-bold text-[#24298D]">
                 Senha de Acesso
               </label>
               <input
+                id="login-password"
                 type="password"
                 required
                 autoComplete="current-password"

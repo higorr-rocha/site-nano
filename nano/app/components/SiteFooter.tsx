@@ -14,7 +14,8 @@ const socialLinks: { label: string; href: string; icon: IconType }[] = [
   { label: "YouTube", href: "https://www.youtube.com/@nanoquímica", icon: FaYoutube },
 ];
 
-const MAPS_URL = "https://www.google.com/maps?saddr=My+Location&daddr=Rua+Rua+Alexandre+Magnusson%2C+2100%0ADistrito+Industrial+%0APrad%C3%B3polis+SP.";
+const MAPS_URL =
+  "https://www.google.com/maps?saddr=My+Location&daddr=Rua+Alexandre+Magnusson%2C+2100%0ADistrito+Industrial+%0APrad%C3%B3polis+SP.";
 
 export default function SiteFooter() {
   return (
@@ -64,6 +65,7 @@ export default function SiteFooter() {
               Seções
             </h2>
             {/* Posicionamento fixo: mobile translate-x-8; PC translate-x-10; colunas aproximadas. */}
+            {/* Backup do alinhamento manual: mx-auto mt-3 grid w-fit translate-x-8 grid-cols-2 gap-x-0 gap-y-1 text-left text-xs leading-5 sm:translate-x-10 sm:text-sm [&>:nth-child(even)]:-translate-x-8 */}
             <div className="mx-auto mt-3 grid w-fit translate-x-8 grid-cols-2 gap-x-0 gap-y-1 text-left text-xs leading-5 sm:translate-x-10 sm:text-sm [&>:nth-child(even)]:-translate-x-8">
               <Link href="/" className="whitespace-nowrap text-white/80 transition-colors hover:text-[#FF8200]">
                 Início

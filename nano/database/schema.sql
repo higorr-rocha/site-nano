@@ -1,4 +1,4 @@
--- Schema Relacional do Banco de Dados Nanoquímica (SQLite)
+-- Schema Relacional do Banco de Dados Nanoquímica (Turso / libSQL)
 
 CREATE TABLE IF NOT EXISTS accounts (
   id TEXT PRIMARY KEY,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS job_applications (
   arquivo_nome TEXT NOT NULL,
   arquivo_mime TEXT NOT NULL,
   arquivo_tamanho_bytes INTEGER NOT NULL,
-  arquivo_base64 TEXT,
+  arquivo_base64 TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'Recebido',
   fingerprint_hash TEXT NOT NULL
 );
@@ -60,4 +60,9 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   bucket_key TEXT PRIMARY KEY,
   timestamps_json TEXT NOT NULL,
   locked_until INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS used_nonces (
+  nonce TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL
 );

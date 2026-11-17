@@ -78,7 +78,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   "acido-fosforico-purificado-nanophos": {
     introHeading: "Aplicações, benefícios e mercado",
     introParagraphs: [
-      "O Nanophós Purificado (Ácido Fosfórico Purificado) é um composto químico de extrema importância em diversas indústrias, sendo amplamente utilizado em aplicações que vão desde a produção de fertilizantes até a clarificação de açúcar. Neste conteúdo preparado pela Nanoquimica, apresentaremos informações essenciais sobre o Ácido Fosfórico Purificado, nosso NANOPHÓS PURIFICADO, abordando suas características, usos e relevância nos setores industriais.",
+      "O Nanophós Purificado (Ácido Fosfórico Purificado) é um composto químico de extrema importância em diversas indústrias, sendo amplamente utilizado em aplicações que vão desde a produção de fertilizantes até a clarificação de açúcar. Neste conteúdo preparado pela Nanoquímica, apresentaremos informações essenciais sobre o Ácido Fosfórico Purificado, nosso NANOPHÓS PURIFICADO, abordando suas características, usos e relevância nos setores industriais.",
     ],
     featuresTitle: "Características do Ácido Fosfórico Purificado",
     featuresParagraphs: [
@@ -110,26 +110,26 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
     highlightTitle: "Benefícios e diferenciais",
     highlightParagraphs: [
       "Uma das principais vantagens do Nanophós Purificado (Ácido Fosfórico Purificado) é sua alta capacidade de clarificação, tornando-o especialmente adequado para aplicações que requerem um alto grau de pureza.",
-      "Outro ponto relevante é sua versatilidade do Nanophós Purificado (Ácido Fosfórico Purificado), pois atende às demandas de diversos segmentos industriais, desde a agricultura até a indústria em geral. Vale ressaltar que, embora o Ácido Fosfórico Purificado não seja o mais caro, sua pureza e eficácia o colocam distante da categoria de produtos de qualidade inferior.",
+      "Outro ponto relevante é a versatilidade do Nanophós Purificado (Ácido Fosfórico Purificado), pois atende às demandas de diversos segmentos industriais, desde a agricultura até a indústria em geral. Vale ressaltar que, embora o Ácido Fosfórico Purificado tenha excelente custo-benefício, sua pureza e eficácia o colocam em um patamar superior de desempenho industrial.",
     ],
     conclusionTitle: "Considerações Finais",
     conclusionLeft: [
       "O Nanophós Purificado (Ácido Fosfórico Purificado) é um componente essencial em muitos processos industriais, desempenhando um papel fundamental na clarificação, purificação e produção de diversos produtos. Sua relevância é evidente nos mercados de fertilizantes, açúcar, couro, alimentos e biodiesel, entre outros.",
-      "Se você busca um produto de alta pureza e qualidade, capaz de atender às demandas de aplicações críticas, o Nanophós Purificado (Ácido Fosfórico Purificado) fornecido pela Nanoquimica é a escolha ideal.",
+      "Se você busca um produto de alta pureza e qualidade, capaz de atender às demandas de aplicações críticas, o Nanophós Purificado (Ácido Fosfórico Purificado) fornecido pela Nanoquímica é a escolha ideal.",
     ],
     conclusionRight: [
       "Com experiência e excelência na produção química, a empresa oferece soluções confiáveis e eficientes para as indústrias que necessitam do melhor desempenho em seus processos.",
-      "Conte com a Nanoquimica para obter o Ácido Fosfórico Purificado que sua empresa precisa. Entre em contato conosco e descubra como nossos produtos podem impulsionar o sucesso do seu negócio.",
+      "Conte com a Nanoquímica para obter o Ácido Fosfórico Purificado que sua empresa precisa. Entre em contato conosco e descubra como nossos produtos podem impulsionar o sucesso do seu negócio.",
     ],
   },
 
   "anti-incrustante-inibir-a-incrustacao": {
-    introHeading: "Descubra o Poderoso Nanocrust! Antincrustantes de Coluna e Evaporação.",
+    introHeading: "Descubra o Poderoso Nanocrust! Anti-incrustantes de Coluna e Evaporação.",
     introParagraphs: [
-      "Em um mundo onde a eficiência é crucial, apresentamos o revolucionário Nanocrust, uma solução avançada para a prevenção de incrustações em colunas e evaporação. Este inovador antincrustante é a resposta para desafios persistentes, oferecendo benefícios excepcionais em diversas aplicações industriais.",
-      "O Nanocrust é um antincrustante de última geração, formulado com nanotecnologia de ponta. Desenvolvido por especialistas, esse produto é projetado especificamente para combater o acúmulo de incrustações em colunas e evaporação, garantindo um desempenho superior em ambientes industriais desafiadores.",
+      "Em um mundo onde a eficiência é crucial, apresentamos o revolucionário Nanocrust, uma solução avançada para a prevenção de incrustações em colunas e evaporação. Este inovador anti-incrustante é a resposta para desafios persistentes, oferecendo benefícios excepcionais em diversas aplicações industriais.",
+      "O Nanocrust é um anti-incrustante de última geração, formulado com nanotecnologia de ponta. Desenvolvido por especialistas, esse produto é projetado especificamente para combater o acúmulo de incrustações em colunas e evaporação, garantindo um desempenho superior em ambientes industriais desafiadores.",
     ],
-    featuresTitle: "O poder do Nanocrut: Um anti-incrustante de qualidade",
+    featuresTitle: "O poder do Nanocrust: Um anti-incrustante de qualidade",
     featuresParagraphs: [
       "O Nanocrust possui um poder incomparável na prevenção de incrustações, proporcionando uma limpeza eficaz e duradoura. Sua formulação avançada age rapidamente, impedindo a formação de depósitos indesejados e promovendo a eficiência operacional. Com Nanocrust, você pode contar com uma solução poderosa que mantém seus sistemas funcionando sem interrupções.",
     ],
@@ -180,13 +180,13 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   },
 
   "auxiliar-para-extracao-de-acucar-nanodec-541": {
-    introHeading: "Dispersante de massa: Eficiência e Inovação para o Processo de Produção de Açúcar",
+    introHeading: "Auxiliar para Extração de Açúcar: Eficiência e Inovação no Processo Produtivo",
     introParagraphs: [
       "O NANODEC 541 é formulado com agentes tensoativos para atuar como auxiliar na extração de sacarose. Sua aplicação contribui para maior eficiência na extração do açúcar, favorecendo o melhor aproveitamento da matéria-prima.",
       "O produto promove a ruptura de agregados coloidais e a dispersão de sólidos presentes no processo, tornando-os mais solúveis ou mais facilmente removíveis. Dessa forma, otimiza a liberação da sacarose durante as etapas de moagem ou difusão.",
     ],
     ctaText:
-      "Entre em contato com nossos especialistas e descubra como o NANODEC 520 pode transformar o seu processo.",
+      "Entre em contato com nossos especialistas e descubra como o NANODEC 541 pode transformar o seu processo.",
     gridTitle: "Benefícios do NANODEC 541",
     gridItems: [
       ["Maior eficiência na extração do açúcar", ""],
@@ -232,8 +232,8 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
     ],
     highlightTitle: "Benefícios e diferenciais",
     highlightParagraphs: [
-      "Uma das principais vantagens do Nanophós Purificado (Ácido Fosfórico Purificado) é sua alta capacidade de clarificação, tornando-o especialmente adequado para aplicações que requerem um alto grau de pureza.",
-      "Outro ponto relevante é sua versatilidade do Nanophós Purificado (Ácido Fosfórico Purificado), pois atende às demandas de diversos segmentos industriais, desde a agricultura até a indústria em geral. Vale ressaltar que, embora o Ácido Fosfórico Purificado não seja o mais caro, sua pureza e eficácia o colocam distante da categoria de produtos de qualidade inferior.",
+      "Uma das principais vantagens dos Bactericidas para Moenda da Nanoquímica é a inibição imediata da inversão da sacarose causada por bactérias contaminantes como Leuconostoc mesenteroides, prevenindo a formação de dextrana e gomas que prejudicam a filtração e a cristalização.",
+      "Outro diferencial importante é a proteção contínua da assepsia industrial nos ternos de moagem e difusores, reduzindo perdas fermentativas indesejadas no caldo misto e assegurando maior recuperação de açúcar (ART) com excelente relação custo-benefício operacional.",
     ],
     conclusionTitle: "Considerações Finais",
     conclusionLeft: [
@@ -388,7 +388,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
     highlightParagraphs: [
       "O NanoClean é ideal para uso em diversos ambientes, incluindo instalações industriais, espaços comerciais e residências. Aplique o NanoClean em superfícies como aço inoxidável, cerâmicas, vidro e muito mais. Seja lidando com resíduos industriais persistentes ou manchas cotidianas em casa, o NanoClean oferece uma solução abrangente para um acabamento impecável.",
     ],
-    conclusionTitle: "NanoClean, a escolha defifinitiva para que busca eficácia!",
+    conclusionTitle: "NanoClean, a escolha definitiva para quem busca eficácia!",
     conclusionLeft: [
       "Elevando os padrões de limpeza química, NanoClean é a escolha definitiva para indústrias que buscam eficácia, confiabilidade e durabilidade.",
     ],
@@ -477,40 +477,40 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   },
 
   "anti-incrustante-de-coluna": {
-    introHeading: "Preservando a Eficiência: O Anti-Incrustante de Coluna na Indústria Vinícola",
+    introHeading: "Preservando a Eficiência: O Anti-Incrustante de Coluna na Destilação de Etanol",
     introParagraphs: [
-      "O anti-incrustante de coluna é um sistema quelante especialmente formulado para complexar íons de metais de transição e sais de dureza. Desenvolvido com precisão, este produto é uma ferramenta indispensável para a indústria vinícola, atuando de forma eficaz na prevenção da formação de incrustações em colunas de destilação e nas bandejas do destilador.",
+      "O anti-incrustante de coluna é um sistema quelante especialmente formulado para complexar íons de metais de transição e sais de dureza presentes no vinho fermentado. Desenvolvido com precisão para usinas e destilarias, este produto é uma ferramenta indispensável na prevenção da formação de incrustações em colunas de destilação e nas bandejas dos aparelhos destiladores.",
     ],
     featuresTitle: "Características e Poder do Anti-incrustante de coluna",
     featuresParagraphs: [
-      "O anti-incrustante de coluna apresenta características únicas que o tornam uma solução excepcional para a manutenção da pureza e eficiência dos processos de destilação na indústria vinícola. Sua formulação especializada é desenvolvida para complexar íons metálicos e sais de dureza, prevenindo a formação de incrustações tanto nas colunas de destilação quanto nas bandejas do destilador. Compatível com o processo de vinificação, este produto destaca-se por sua capacidade de evitar a agregação de resíduos indesejáveis, garantindo a qualidade e integridade do vinho produzido.",
-      "Graças à sua formulação avançada, o anti-incrustante de coluna demonstra um poder excepcional na manutenção da limpeza e eficiência dos equipamentos de destilação. Sua ação quelante impede a agregação de íons metálicos e sais de dureza, evitando assim a formação de incrustações que poderiam comprometer a qualidade do produto final.",
+      "O anti-incrustante de coluna apresenta características únicas que o tornam uma solução excepcional para a manutenção da pureza e eficiência dos processos de destilação de etanol. Sua formulação especializada é desenvolvida para complexar íons metálicos e sais de dureza (como sulfato de cálcio e oxalatos), prevenindo a formação de incrustações tanto nas colunas de destilação quanto nas bandejas e calotas. Totalmente compatível com o processo sucroenergético, evita o entupimento e a perda de troca térmica, garantindo a continuidade operacional da destilaria.",
+      "Graças à sua formulação avançada, o anti-incrustante de coluna demonstra um poder excepcional na manutenção da limpeza e eficiência dos equipamentos de destilação. Sua ação quelante impede a precipitação e agregação de sais minerais sob alta temperatura, evitando paradas não programadas para limpeza química ou mecânica.",
     ],
     gridTitle: "Saiba onde Aplicar",
     gridItems: [
       [
-        "Indústria Vinícola:",
-        "Ideal para uso em processos de vinificação, garantindo a integridade e pureza do vinho.",
+        "Destilarias de Etanol:",
+        "Ideal para dosagem contínua no vinho a caminho dos aparelhos de destilação, mantendo a estabilidade operacional durante toda a safra.",
       ],
       [
-        "Colunas de Destilação:",
-        "Aplicável para prevenir a formação de incrustações, mantendo as colunas de destilação limpas e eficientes.",
+        "Colunas de Destilação (A, A1 e D):",
+        "Aplicável para prevenir a formação de incrustações severas, mantendo as colunas de destilação limpas e com baixa perda de carga.",
       ],
       [
-        "Bandejas do Destilador:",
-        "Utilizado para evitar a acumulação de resíduos nas bandejas, garantindo um processo de destilação suave e contínuo.",
+        "Bandejas, Calotas e Trocadores de Calor:",
+        "Utilizado para evitar a acumulação de depósitos minerais nas bandejas e refervedores, garantindo um processo de destilação contínuo e econômico.",
       ],
     ],
-    highlightTitle: "Vantagens e beneficio de Anti-incrustante de coluna",
+    highlightTitle: "Vantagens e benefícios do Anti-incrustante de coluna",
     highlightParagraphs: [
-      "A utilização do anti-incrustante de coluna oferece benefícios significativos para a indústria vinícola e de destilação. Além de manter a pureza e eficiência dos processos, reduz o tempo de manutenção, preserva a qualidade dos produtos finais e diminui os custos operacionais. Em resumo, é uma escolha inteligente para garantir excelência operacional e qualidade do produto.",
+      "A utilização do anti-incrustante de coluna oferece benefícios significativos para destilarias de etanol. Além de manter a vazão nominal e a eficiência energética das colunas, reduz drasticamente o tempo de parada para manutenção, preserva a integridade dos equipamentos e diminui o consumo de vapor e os custos operacionais.",
     ],
     conclusionTitle: "Segurança, eficiência e excelência! Anti-incrustante de coluna",
     conclusionLeft: [
-      "Em suma, o anti-incrustante de coluna emerge como uma solução indispensável para a indústria vinícola e de destilação, oferecendo uma maneira eficaz de prevenir a formação de incrustações e garantir a qualidade dos produtos finais.",
+      "Em suma, o anti-incrustante de coluna emerge como uma solução indispensável para destilarias de etanol, oferecendo uma maneira eficaz de prevenir a formação de incrustações e garantir o máximo rendimento de destilação.",
     ],
     conclusionRight: [
-      "Sua formulação avançada e poderosa ação quelante destacam-no como uma escolha confiável para manter a pureza e eficiência dos processos de produção. Ao adotar este produto, as empresas podem alcançar um novo patamar de excelência operacional e qualidade do produto.",
+      "Sua formulação avançada e poderosa ação quelante destacam-no como uma escolha confiável para manter a limpeza e a disponibilidade dos aparelhos de destilação. Ao adotar este produto, as usinas alcançam um novo patamar de excelência operacional.",
     ],
   },
 
@@ -543,7 +543,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
         "Para otimizar a produção de biogás, reduzindo a competição bacteriana.",
       ],
     ],
-    highlightTitle: "Vantagens e beneficio de Utilizar o Antibiótico Líquido (Monensina)",
+    highlightTitle: "Vantagens e benefícios de Utilizar o Antibiótico Líquido (Monensina)",
     highlightParagraphs: [
       "Os benefícios do Antibiótico Líquido são significativos. Controlando as bactérias indesejadas, promove uma fermentação mais rápida e completa, melhorando a eficiência do processo. Além disso, minimiza a formação de subprodutos indesejados, garantindo um produto final de maior pureza. Previne falhas no processo de fermentação, reduzindo desperdícios e custos operacionais, proporcionando economias substanciais para as empresas. Em suma, oferece eficiência, qualidade aprimorada e vantagens econômicas na indústria da fermentação etanólica.",
     ],
@@ -557,14 +557,14 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   },
 
   "antiespumante-e-dispersante-ganho-de-eficiencia-no-controle-da-espuma": {
-    introHeading: "Antiespumantes e Dispersantes de qualidade da Nano Química",
+    introHeading: "Antiespumantes e Dispersantes de qualidade da Nanoquímica",
     introParagraphs: [
-      "Na Nano Química, somos especializados na fabricação e distribuição de produtos químicos para diversos segmentos, temos compromisso em fornecer produtos de alta qualidade a preços justos. Nosso portfólio inclui Antiespumantes e Dispersantes exclusivos que atendem às necessidades de várias indústrias, incluindo a sucroalcooleira, têxtil, tratamento de água, esgoto e muito mais.",
+      "Na Nanoquímica, somos especializados na fabricação e distribuição de produtos químicos para diversos segmentos, temos compromisso em fornecer produtos de alta qualidade a preços justos. Nosso portfólio inclui Antiespumantes e Dispersantes exclusivos que atendem às necessidades de várias indústrias, incluindo a sucroalcooleira, têxtil, tratamento de água, esgoto e muito mais.",
     ],
     featuresTitle: "Soluções personalizadas para diferentes setores industriais",
     featuresParagraphs: [
-      "Quando o assunto é Controladores de Espuma, aqui na Nano Química você terá personalização para cada necessidade. Nossos Antiespumantes e Dispersantes são formulados para atender às demandas específicas de cada setor. Para a indústria sucroalcooleira, oferecemos um Antiespumante de base oleosa que não apenas quebra a espuma existente, mas também previne a formação de mais espuma. Esse produto se destaca como um aliado vital durante os processos da indústria sucroalcooleira.",
-      "No segmento têxtil e de tratamento de efluentes, nosso Antiespumante de base aquosa siliconada, demonstra sua eficácia e ajuda a controlar a formação de espuma em processos industriais, garantindo um ambiente de trabalho mais eficiente e produtivo.",
+      "Quando o assunto é Controladores de Espuma, aqui na Nanoquímica você terá personalização para cada necessidade. Nossos Antiespumantes e Dispersantes são formulados para atender às demandas específicas de cada setor. Para a indústria sucroalcooleira, oferecemos um Antiespumante de base oleosa que não apenas quebra a espuma existente, mas também previne a formação de mais espuma. Esse produto se destaca como um aliado vital durante os processos da indústria sucroalcooleira.",
+      "No segmento têxtil e de tratamento de efluentes, nosso Antiespumante de base aquosa siliconada demonstra sua eficácia e ajuda a controlar a formação de espuma em processos industriais, garantindo um ambiente de trabalho mais eficiente e produtivo.",
       "Outras indústrias, como a de fertilizantes e tratamento de água, também se beneficiam de nossos produtos. Nossa abordagem focada na qualidade e na adequação às demandas específicas de cada setor nos diferencia.",
     ],
     gridTitle: "Benefícios tangíveis para sua produção",
@@ -580,31 +580,31 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
       ],
       [
         "Relação de Consumo e Custo Vantajosa:",
-        "Nossos produtos oferecem uma excelente relação de consumo (g/L) e um ótimo custo-benefício (R$/m3), o que contribui para uma operação mais econômica.",
+        "Nossos produtos oferecem uma excelente relação de consumo (g/L) e um ótimo custo-benefício (R$/m³), o que contribui para uma operação mais econômica.",
       ],
       [
         "Prevenção de Micro-Organismos:",
         "Nosso Antiespumante de base oleosa evita a formação de resíduos de cera na dorna, reduzindo assim o risco de proliferação de micro-organismos.",
       ],
     ],
-    conclusionTitle: "Entre em contato com a Nano Química",
+    conclusionTitle: "Entre em contato com a Nanoquímica",
     conclusionLeft: [
-      "Na Nano Química, nosso compromisso vai além dos produtos. Oferecemos suporte técnico especializado in loco para atender integralmente às necessidades dos nossos clientes. Estamos aqui para garantir que você obtenha o máximo de benefícios dos nossos produtos.",
-      "Para adquirir nossos Antiespumantes e Dispersantes ou obter mais informações, você pode entrar em contato conosco de diversas maneiras: preenchendo o formulário em nosso site, através do WhatsApp no canto da tela. Estamos prontos para oferecer soluções químicas de qualidade que impulsionem o seu negócio.",
+      "Na Nanoquímica, nosso compromisso vai além dos produtos. Oferecemos suporte técnico especializado in loco para atender integralmente às necessidades dos nossos clientes. Estamos aqui para garantir que você obtenha o máximo de benefícios dos nossos produtos.",
+      "Para adquirir nossos Antiespumantes e Dispersantes ou obter mais informações, você pode entrar em contato conosco preenchendo o formulário em nosso site ou pelos nossos canais diretos de atendimento. Estamos prontos para oferecer soluções químicas de qualidade que impulsionem o seu negócio.",
     ],
     conclusionRight: [
-      "Confie na Nano Química como seu parceiro confiável para produtos Antiespumantes e Dispersantes que atendem às demandas específicas da sua indústria. Estamos comprometidos com a qualidade e o desempenho excepcionais, sempre trabalhando para impulsionar o sucesso dos nossos clientes.",
+      "Confie na Nanoquímica como seu parceiro confiável para produtos Antiespumantes e Dispersantes que atendem às demandas específicas da sua indústria. Estamos comprometidos com a qualidade e o desempenho excepcionais, sempre trabalhando para impulsionar o sucesso dos nossos clientes.",
     ],
   },
 
   "bactericidas-controle-da-infeccao-na-fermentacao": {
-    introHeading: "Bactericidas da Nano Química: eficiência e resultados em processos de fermentação",
+    introHeading: "Bactericidas da Nanoquímica: eficiência e resultados em processos de fermentação",
     introParagraphs: [
-      "Na Nano Química, estamos comprometidos em fornecer soluções químicas inovadoras e eficazes para diversas indústrias. Como parte do nosso catálogo de produtos, apresentamos a linha NANOBAC, bactericidas de excelência que oferece eficiência, segurança e economia para os processos de fermentação. Com uma abordagem orientada para resultados, nosso objetivo é revolucionar o mercado, proporcionando resultados equiparáveis a um preço mais acessível.",
+      "Na Nanoquímica, estamos comprometidos em fornecer soluções químicas inovadoras e eficazes para diversas indústrias. Como parte do nosso catálogo de produtos, apresentamos a linha NANOBAC, bactericidas de excelência que oferecem eficiência, segurança e economia para os processos de fermentação. Com uma abordagem orientada para resultados, nosso objetivo é revolucionar o mercado, proporcionando resultados equiparáveis a um preço mais acessível.",
     ],
     featuresTitle: "O poder da linha NANOBAC: bactericidas líquidos para processos de fermentação",
     featuresParagraphs: [
-      "A linha NANOBAC são bactericidas líquidos a base de clorito de sódio, extratos vegetais, monensina em emulsão, nanopartículas e sais de quaternário de amônio, que se destacam no mercado pela sua eficácia e versatilidade, linha completa para atender desde os produtos naturais e/ou orgânicos aos sintéticos. Projetado para processos de fermentação em diversos setores, desde a indústria alimentícia até a produção de bebidas, a família NANOBAC oferece controle efetivo sobre a microbiota presente, assegurando resultados confiáveis e consistentes.",
+      "A linha NANOBAC é composta por bactericidas líquidos à base de clorito de sódio, extratos vegetais, monensina em emulsão, nanopartículas e sais de quaternário de amônio, que se destacam no mercado pela sua eficácia e versatilidade, compondo uma linha completa para atender desde os produtos naturais e/ou orgânicos aos sintéticos. Projetada para processos de fermentação em diversos setores, desde a indústria sucroenergética até a produção de bebidas, a família NANOBAC oferece controle efetivo sobre a microbiota presente, assegurando resultados confiáveis e consistentes.",
     ],
     gridTitle: "Benefícios inquestionáveis para a sua produção",
     gridIntro: "Nossos bactericidas trazem uma série de vantagens notáveis para a sua produção:",
@@ -628,14 +628,14 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
     ],
     highlightTitle: "Aplicação em diferentes setores industriais",
     highlightParagraphs: [
-      "A linha NANOBAC tem como foco principal a produção de etanol, porém encontra aplicação em uma variedade de indústrias que utilizam processos de fermentação, tais como produção de alimentos, bebidas e outros produtos. Seja você um produtor de cerveja, vinho, laticínios ou alimentos fermentados, nossos bactericidas podem otimizar seus processos e garantir resultados de alta qualidade.",
+      "A linha NANOBAC tem como foco principal a produção de etanol, porém encontra aplicação em uma variedade de indústrias que utilizam processos de fermentação, tais como produção de alimentos, bebidas e outros produtos. Seja você uma usina de etanol ou produtor industrial, nossos bactericidas podem otimizar seus processos e garantir resultados de alta qualidade.",
     ],
     conclusionTitle: "Contato e Aquisição",
     conclusionLeft: [
-      "Para adquirir o NANOBAC ou obter mais informações sobre os nossos produtos bactericidas, você pode entrar em contato conosco de maneira simples e conveniente. Utilize o formulário em nosso site ou clique no botão do WhatsApp no canto da tela para iniciar uma conversa. Estamos comprometidos em fornecer as soluções que a sua produção merece.",
+      "Para adquirir o NANOBAC ou obter mais informações sobre os nossos produtos bactericidas, você pode entrar em contato conosco de maneira simples e conveniente através do formulário de contato em nosso site ou pelos nossos canais de atendimento. Estamos comprometidos em fornecer as soluções que a sua produção merece.",
     ],
     conclusionRight: [
-      "Na Nanoquímica, temos a visão de tornar as soluções químicas eficazes mais acessíveis e alinhadas com as necessidades das indústrias. Com o NANOBAC, você pode ter confiança em processos de fermentação controlados e resultados impressionantes, tudo isso a um preço mais vantajoso. Escolha a Nano Química como seu parceiro confiável em bactericidas e experiencie o próximo nível de eficiência nos seus processos industriais.",
+      "Na Nanoquímica, temos a visão de tornar as soluções químicas eficazes mais acessíveis e alinhadas com as necessidades das indústrias. Com o NANOBAC, você pode ter confiança em processos de fermentação controlados e resultados impressionantes, tudo isso a um preço mais vantajoso. Escolha a Nanoquímica como seu parceiro confiável em bactericidas e experiencie o próximo nível de eficiência nos seus processos industriais.",
     ],
   },
 
@@ -687,7 +687,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   "biocidas-dioxido-de-cloro": {
     introHeading: "Descubra a Revolução do Controle Microbiológico com NANOBAC 432!",
     introParagraphs: [
-      "O NANOBAC 432 representa a vanguarda do controle microbiológico nas usinas, introduzindo o poder do dióxido de cloro (Clo2) de forma eficiente e comprovada. Desde a década de 1940, o dióxido de cloro tem sido uma ferramenta confiável nas indústrias, e o NANOBAC 432 eleva ainda mais esse legado ao oferecer uma solução estável em clorito de sódio, com uma concentração impressionante de 32%.",
+      "O NANOBAC 432 representa a vanguarda do controle microbiológico nas usinas, introduzindo o poder do dióxido de cloro (ClO2) de forma eficiente e comprovada. Desde a década de 1940, o dióxido de cloro tem sido uma ferramenta confiável nas indústrias, e o NANOBAC 432 eleva ainda mais esse legado ao oferecer uma solução estável em clorito de sódio, com uma concentração impressionante de 32%.",
     ],
     featuresTitle: "O Poder do NanoBac 432",
     featuresParagraphs: [
@@ -757,7 +757,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
         "Em processos de fabricação de medicamentos e produtos farmacêuticos que exigem um ambiente de produção livre de contaminação por espuma.",
       ],
     ],
-    highlightTitle: "Vantagens e beneficio do Dispersante à Base de Poliglicóis",
+    highlightTitle: "Vantagens e benefícios do Dispersante à Base de Poliglicóis",
     highlightParagraphs: [
       "O dispersante à base de poliglicóis oferece uma série de benefícios significativos para várias indústrias. Sua aplicação proporciona eficiência ao reduzir os tempos de inatividade relacionados à limpeza de equipamentos e remoção de espuma. Além disso, ele reduz o consumo de antiespumantes, resultando em economias de custo substanciais. Garante a qualidade dos produtos finais, eliminando a contaminação por espuma e mantendo a consistência dos processos industriais. Em resumo, o uso deste produto promove eficiência operacional, qualidade do produto e rentabilidade das operações industriais.",
     ],
@@ -795,7 +795,7 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
         "Utilizado em diversas operações que envolvem o uso de etanol como matéria-prima, garantindo a neutralização de ácidos e a estabilidade do produto em processos de síntese química.",
       ],
     ],
-    highlightTitle: "Vantagens e beneficio do Neutralizante de Etanol",
+    highlightTitle: "Vantagens e benefícios do Neutralizante de Etanol",
     highlightParagraphs: [
       "O uso do neutralizante de etanol oferece uma série de benefícios para as indústrias onde é aplicado. Garante a qualidade e a estabilidade do etanol produzido, evitando a formação de subprodutos indesejados e prolongando a vida útil dos equipamentos. Além disso, contribui para a eficiência dos processos de produção, garantindo a consistência dos produtos finais e reduzindo os custos operacionais associados a problemas de instabilidade química.",
     ],
@@ -809,41 +809,41 @@ export const productDetailsBySlug: Record<string, ProductDetailContent> = {
   },
 
   "nutrientes-aumento-da-propagacao-do-fermento-no-inicio-da-safra": {
-    introHeading: "Fermentação com Máxima Eficiência: Confira a Linha NanoSpuma.",
+    introHeading: "Nutrição de Alta Performance: Propagação Vigorosa do Fermento desde o Início da Safra",
     introParagraphs: [
-      "A linha NanoSpuma é a resposta inovadora para alcançar a máxima eficiência em processos de fermentação. Desenvolvida com tecnologia de ponta, essa gama de produtos é cuidadosamente formulada para atender às exigências dos mais diversos setores industriais, proporcionando resultados excepcionais em cada aplicação.",
+      "A linha de Nutrientes da Nanoquímica foi especialmente formulada para suprir as necessidades nutricionais das leveduras (Saccharomyces cerevisiae) na etapa crítica de partida e ao longo de toda a safra sucroenergética. Com uma combinação balanceada de sais minerais, vitaminas e fontes biodisponíveis de nitrogênio, fósforo, magnésio e zinco, o produto acelera a multiplicação celular e fortalece o fermento industrial.",
     ],
-    featuresTitle: "O Poder da Linha NanoSpuma",
+    featuresTitle: "O Poder dos Nutrientes na Fermentação Etanólica",
     featuresParagraphs: [
-      "A linha NanoSpuma incorpora agentes ativos de última geração que impulsionam a fermentação a níveis inigualáveis. Sua formulação exclusiva promove uma atividade fermentativa robusta, acelerando o tempo de produção sem comprometer a qualidade do produto final. Além disso, a NanoSpuma contribui para a uniformidade e consistência dos lotes, garantindo uma fermentação controlada e previsível.",
+      "No início da safra ou em momentos de queda de viabilidade celular, o mosto frequentemente apresenta carências nutricionais que limitam a velocidade de propagação do pé-de-cuba. Nossos nutrientes atuam diretamente no metabolismo da levedura, estimulando a divisão celular rápida, aumentando o teor de trealose e ergosterol na membrana e elevando a tolerância ao estresse alcoólico, térmico e osmótico nas dornas de fermentação.",
     ],
-    gridTitle: "Benefícios tangíveis para sua produção",
+    gridTitle: "Benefícios tangíveis para sua destilaria",
     gridItems: [
       [
-        "Aceleração do Processo:",
-        "Redução significativa no tempo de fermentação, aumentando a produtividade.",
+        "Aceleração da Propagação Inicial:",
+        "Reduz o tempo necessário para formação e multiplicação do pé-de-cuba no início da safra, antecipando a plena capacidade fermentativa.",
       ],
       [
-        "Melhoria na Qualidade:",
-        "Contribui para a obtenção de produtos finais de alta qualidade, com características sensoriais aprimoradas.",
+        "Alta Viabilidade e Brotamento:",
+        "Eleva a taxa de brotamento e mantém a viabilidade celular das leveduras em patamares superiores durante os ciclos fermentativos.",
       ],
       [
-        "Economia de Recursos:",
-        "Otimiza o uso de insumos, reduzindo o consumo de matérias-primas e energia.",
+        "Maior Rendimento Fermentativo:",
+        "Favorece a conversão rápida de açúcares em etanol, reduzindo a formação de subprodutos indesejados como glicerol e ácidos orgânicos.",
       ],
       [
-        "Controle Preciso:",
-        "Proporciona controle preciso sobre os parâmetros fermentativos, minimizando variações indesejadas.",
+        "Resistência ao Estresse Industrial:",
+        "Fortalece a parede e a membrana celular das leveduras contra choques térmicos, variações de pH e teores elevados de etanol no vinho.",
       ],
       [
-        "Versatilidade:",
-        "Adapta-se a diferentes tipos de fermentação, sendo ideal para processos em diversos setores da indústria alimentícia.",
+        "Estabilidade Operacional:",
+        "Diminui a necessidade de reposição constante de fermento e mantém a fermentação estável mesmo com variações na qualidade da matéria-prima.",
       ],
     ],
-    highlightTitle: "Saiba onde aplicar a NanoSpuma",
+    highlightTitle: "Onde aplicar os Nutrientes Nanoquímica",
     highlightParagraphs: [
-      "A versatilidade da NanoSpuma permite sua aplicação em uma variedade de processos fermentativos. Indústrias de cervejaria, vinificação, panificação e produção de produtos lácteos podem se beneficiar significativamente. Desde a fermentação de massas para pães até a produção de vinhos e cervejas, a NanoSpuma destaca-se como a escolha preferida para garantir resultados consistentes e eficientes em todas as fases do processo fermentativo.",
-      "Para alcançar os mais altos padrões de eficiência na fermentação, não há escolha melhor do que a linha NanoSpuma. Seja para acelerar o tempo de produção, melhorar a qualidade do produto final ou garantir um controle preciso sobre o processo, a NanoSpuma é a parceira confiável que impulsiona a excelência em cada lote. Confira hoje mesmo como a NanoSpuma pode transformar seus processos fermentativos, elevando seus produtos a um novo patamar de qualidade e eficiência.",
+      "Os Nutrientes para Fermentação da Nanoquímica devem ser aplicados nos propagadores de fermento (pé-de-cuba), nas cubas de tratamento ácido ou diretamente nas dornas de fermentação, conforme diagnóstico microbiológico e acompanhamento técnico da nossa equipe especializada.",
+      "Conte com a tecnologia e o suporte in loco da Nanoquímica para garantir uma partida de safra rápida, segura e com máxima produtividade de etanol.",
     ],
   },
 };

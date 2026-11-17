@@ -2,12 +2,29 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { dbExecute, dbQueryGet } from "./db";
 
+const DEV_FALLBACKS: Record<string, string> = {
+  NANO_SERVER_HMAC_SECRET:
+    "dev-only-hmac-secret-nanoquimica-configure-env-local-em-producao-64bytes",
+  NANO_DUMMY_PASSWORD_SALT: "0123456789abcdef0123456789abcdef",
+  NANO_DUMMY_PASSWORD_HASH:
+    "2c70e12b7a0646f92279f427c7b38e7334d8e5389cff167a1dc30e73f826b683" +
+    "2c70e12b7a0646f92279f427c7b38e7334d8e5389cff167a1dc30e73f826b683",
+};
+
 function getRequiredEnv(key: string): string {
   const val = process.env[key];
-  if (!val || val.trim().length === 0) {
-    throw new Error(`Variável de ambiente de segurança obrigatória ausente: ${key}`);
+  if (val && val.trim().length > 0) {
+    return val.trim();
   }
-  return val.trim();
+
+  // Em desenvolvimento local (npm run dev), usa fallback seguro caso o .env.local ainda não tenha sido copiado
+  if (process.env.NODE_ENV !== "production" && DEV_FALLBACKS[key]) {
+    return DEV_FALLBACKS[key];
+  }
+
+  throw new Error(
+    `Variável de ambiente de segurança obrigatória ausente: ${key}. Crie o arquivo nano/.env.local ou configure nas Environment Variables da Vercel.`
+  );
 }
 
 export function getSessionCookieName(): string {
@@ -40,13 +57,16 @@ function derivePasswordHash(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
 }
 
-// Constant-time password verification against the SQLite `accounts` table
-export function verifyAccountCredentials(emailRaw: unknown, passwordRaw: unknown): AdminAccount | null {
+// Constant-time password verification against the Turso `accounts` table
+export async function verifyAccountCredentials(
+  emailRaw: unknown,
+  passwordRaw: unknown
+): Promise<AdminAccount | null> {
   const email = sanitizeStrictString(emailRaw, 120).toLowerCase();
   const password = typeof passwordRaw === "string" ? passwordRaw.slice(0, 128) : "";
   if (!email || !password) return null;
 
-  const row = dbQueryGet<DbAccountRow>(
+  const row = await dbQueryGet<DbAccountRow>(
     "SELECT id, email, name, role_label, scopes_json, password_salt, password_hash, active FROM accounts WHERE lower(email) = ? LIMIT 1",
     [email]
   );
@@ -54,8 +74,8 @@ export function verifyAccountCredentials(emailRaw: unknown, passwordRaw: unknown
   const dummySalt = getRequiredEnv("NANO_DUMMY_PASSWORD_SALT");
   const dummyHash = getRequiredEnv("NANO_DUMMY_PASSWORD_HASH");
 
-  const saltToUse = row ? row.password_salt : dummySalt;
-  const expectedHash = row ? row.password_hash : dummyHash;
+  const saltToUse = row ? String(row.password_salt) : dummySalt;
+  const expectedHash = row ? String(row.password_hash) : dummyHash;
   const candidateHash = derivePasswordHash(password, saltToUse);
 
   const bufA = Buffer.from(candidateHash, "hex");
@@ -63,40 +83,36 @@ export function verifyAccountCredentials(emailRaw: unknown, passwordRaw: unknown
   if (bufA.length !== bufB.length) return null;
 
   const isMatch = crypto.timingSafeEqual(bufA, bufB);
-  if (!isMatch || !row || !row.active) return null;
+  if (!isMatch || !row || !Number(row.active)) return null;
 
   let scopes: RoleScope[] = [];
   try {
-    scopes = JSON.parse(row.scopes_json) as RoleScope[];
+    scopes = JSON.parse(String(row.scopes_json)) as RoleScope[];
   } catch {
     scopes = [];
   }
 
+  const roleLabel = String(row.role_label);
+
   return {
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    roleLabel: row.role_label === "Diretoria Nanoquímica" ? "Diretoria" : row.role_label,
+    id: String(row.id),
+    email: String(row.email),
+    name: String(row.name),
+    roleLabel: roleLabel === "Diretoria Nanoquímica" ? "Diretoria" : roleLabel,
     scopes,
   };
 }
 
-// Strict string coercion & anti-XSS / anti-injection sanitization
+// Strict string coercion & control-char removal without double HTML-entity escaping
 export function sanitizeStrictString(input: unknown, maxLength = 1000): string {
   if (typeof input !== "string") {
     return "";
   }
-  const cleaned = input
+  return input
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
     .trim()
+    .normalize("NFC")
     .slice(0, maxLength);
-
-  return cleaned
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
 }
 
 export function isValidEmail(email: string): boolean {
@@ -104,16 +120,21 @@ export function isValidEmail(email: string): boolean {
   return re.test(email);
 }
 
-// Validate resume file: only .pdf, .doc, .docx + MIME + Magic Bytes + Max 1MB
+// Validate resume file: mandatory non-empty binary + .pdf/.doc/.docx + MIME + Magic Bytes + real Buffer size <= 1MB
 export function validateResumeFile(
   fileNameRaw: unknown,
   mimeTypeRaw: unknown,
-  fileSizeRaw: unknown,
+  _fileSizeRaw: unknown,
   base64ContentRaw: unknown
-): { valid: boolean; error?: string; safeFileName?: string; sizeBytes?: number } {
+): {
+  valid: boolean;
+  error?: string;
+  safeFileName?: string;
+  sizeBytes?: number;
+  cleanBase64?: string;
+} {
   const fileName = sanitizeStrictString(fileNameRaw, 180).replace(/[^a-zA-Z0-9._ -]/g, "_");
   const mimeType = sanitizeStrictString(mimeTypeRaw, 120).toLowerCase();
-  const sizeBytes = typeof fileSizeRaw === "number" ? fileSizeRaw : Number(fileSizeRaw) || 0;
 
   if (!fileName) {
     return { valid: false, error: "Arquivo de currículo obrigatório." };
@@ -132,60 +153,97 @@ export function validateResumeFile(
   if (!hasAllowedExt || !allowedMimes.has(mimeType)) {
     return {
       valid: false,
-      error: "Formato de arquivo inválido! São aceitos exclusivamente arquivos PDF (.pdf), Word (.doc ou .docx).",
+      error:
+        "Formato de arquivo inválido! São aceitos exclusivamente arquivos PDF (.pdf), Word (.doc ou .docx).",
     };
   }
 
-  if (sizeBytes <= 0 || sizeBytes > 1024 * 1024) {
+  if (typeof base64ContentRaw !== "string" || base64ContentRaw.trim().length === 0) {
     return {
       valid: false,
-      error: "O arquivo deve ter no máximo 1MB.",
+      error: "O conteúdo do arquivo de currículo é obrigatório e não pode estar vazio.",
     };
   }
 
-  if (typeof base64ContentRaw === "string" && base64ContentRaw.length > 0) {
-    try {
-      const rawBase64 = base64ContentRaw.includes(",")
-        ? base64ContentRaw.split(",")[1]
-        : base64ContentRaw;
-      const buf = Buffer.from(rawBase64.slice(0, 64), "base64");
-      const isPdfMagic = buf.length >= 4 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46;
-      const isDocMagic = buf.length >= 4 && buf[0] === 0xd0 && buf[1] === 0xcf && buf[2] === 0x11 && buf[3] === 0xe0;
-      const isDocxMagic = buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
+  try {
+    const rawBase64 = (
+      base64ContentRaw.includes(",") ? base64ContentRaw.split(",")[1] : base64ContentRaw
+    ).trim();
 
-      if (
-        (lowerName.endsWith(".pdf") && !isPdfMagic) ||
-        (lowerName.endsWith(".doc") && !isDocMagic) ||
-        (lowerName.endsWith(".docx") && !isDocxMagic)
-      ) {
-        return {
-          valid: false,
-          error: "Assinatura binária do arquivo inválida. Envie um arquivo PDF, DOC ou DOCX autêntico.",
-        };
-      }
-    } catch {
-      return { valid: false, error: "Não foi possível validar o conteúdo binário do currículo." };
+    if (!rawBase64 || !/^[A-Za-z0-9+/=\r\n]+$/.test(rawBase64)) {
+      return {
+        valid: false,
+        error: "Codificação binária do currículo inválida.",
+      };
     }
-  }
 
-  return { valid: true, safeFileName: fileName, sizeBytes };
+    const fullBuffer = Buffer.from(rawBase64, "base64");
+    const realSizeBytes = fullBuffer.byteLength;
+
+    if (realSizeBytes <= 0 || realSizeBytes > 1024 * 1024) {
+      return {
+        valid: false,
+        error: "O arquivo deve ter tamanho real entre 1 byte e no máximo 1MB.",
+      };
+    }
+
+    const isPdfMagic =
+      fullBuffer.length >= 4 &&
+      fullBuffer[0] === 0x25 &&
+      fullBuffer[1] === 0x50 &&
+      fullBuffer[2] === 0x44 &&
+      fullBuffer[3] === 0x46;
+    const isDocMagic =
+      fullBuffer.length >= 4 &&
+      fullBuffer[0] === 0xd0 &&
+      fullBuffer[1] === 0xcf &&
+      fullBuffer[2] === 0x11 &&
+      fullBuffer[3] === 0xe0;
+    const isDocxMagic =
+      fullBuffer.length >= 4 &&
+      fullBuffer[0] === 0x50 &&
+      fullBuffer[1] === 0x4b &&
+      fullBuffer[2] === 0x03 &&
+      fullBuffer[3] === 0x04;
+
+    if (
+      (lowerName.endsWith(".pdf") && !isPdfMagic) ||
+      (lowerName.endsWith(".doc") && !isDocMagic) ||
+      (lowerName.endsWith(".docx") && !isDocxMagic)
+    ) {
+      return {
+        valid: false,
+        error:
+          "Assinatura binária do arquivo inválida. Envie um arquivo PDF, DOC ou DOCX autêntico.",
+      };
+    }
+
+    return {
+      valid: true,
+      safeFileName: fileName,
+      sizeBytes: realSizeBytes,
+      cleanBase64: rawBase64,
+    };
+  } catch {
+    return { valid: false, error: "Não foi possível validar o conteúdo binário do currículo." };
+  }
 }
 
-// Persistent SQLite-backed Rate Limiter
+// Persistent Turso-backed Rate Limiter
 interface DbRateLimitRow {
   bucket_key: string;
   timestamps_json: string;
   locked_until: number;
 }
 
-export function checkRateLimit(
+export async function checkRateLimit(
   bucketKey: string,
   maxAttempts: number,
   windowMs: number,
   lockoutMs: number
-): { allowed: boolean; retryAfterSeconds: number } {
+): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
   const now = Date.now();
-  const row = dbQueryGet<DbRateLimitRow>(
+  const row = await dbQueryGet<DbRateLimitRow>(
     "SELECT bucket_key, timestamps_json, locked_until FROM rate_limits WHERE bucket_key = ? LIMIT 1",
     [bucketKey]
   );
@@ -196,7 +254,7 @@ export function checkRateLimit(
   if (row) {
     lockedUntil = Number(row.locked_until) || 0;
     try {
-      timestamps = JSON.parse(row.timestamps_json) as number[];
+      timestamps = JSON.parse(String(row.timestamps_json)) as number[];
     } catch {
       timestamps = [];
     }
@@ -212,7 +270,7 @@ export function checkRateLimit(
   const validTimestamps = timestamps.filter((t) => now - t < windowMs);
   if (validTimestamps.length >= maxAttempts) {
     const newLock = now + lockoutMs;
-    dbExecute(
+    await dbExecute(
       `INSERT INTO rate_limits (bucket_key, timestamps_json, locked_until)
        VALUES (?, ?, ?)
        ON CONFLICT(bucket_key) DO UPDATE SET timestamps_json = excluded.timestamps_json, locked_until = excluded.locked_until`,
@@ -225,7 +283,7 @@ export function checkRateLimit(
   }
 
   validTimestamps.push(now);
-  dbExecute(
+  await dbExecute(
     `INSERT INTO rate_limits (bucket_key, timestamps_json, locked_until)
      VALUES (?, ?, 0)
      ON CONFLICT(bucket_key) DO UPDATE SET timestamps_json = excluded.timestamps_json, locked_until = 0`,
@@ -234,18 +292,25 @@ export function checkRateLimit(
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
-export function getClientIdentifier(req: NextRequest): string {
-  const ip = getClientIp(req);
-  const ua = req.headers.get("user-agent") || "unknown";
-  return crypto.createHash("sha256").update(`${ip}|${ua}`).digest("hex").slice(0, 32);
-}
-
 export function getClientIp(req: NextRequest): string {
+  const vercelForwarded = req.headers.get("x-vercel-forwarded-for");
+  if (vercelForwarded) {
+    return vercelForwarded.split(",")[0].trim();
+  }
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) {
+    return realIp.trim();
+  }
   const forwarded = req.headers.get("x-forwarded-for");
   return forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
 }
 
-// Cryptographic Challenge & Request/Response HMAC-SHA256 Signing using .env secret
+export function getClientIdentifier(req: NextRequest): string {
+  const ip = getClientIp(req);
+  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
+}
+
+// Cryptographic Challenge & One-Time Nonce Verification using .env secret + Turso
 export function createSignedChallenge(): {
   nonce: string;
   timestamp: number;
@@ -262,20 +327,23 @@ export function createSignedChallenge(): {
   return { nonce, timestamp, serverSignature };
 }
 
-export function verifySignedChallenge(
+export async function verifySignedChallenge(
   nonceRaw: unknown,
   timestampRaw: unknown,
   signatureRaw: unknown
-): boolean {
+): Promise<boolean> {
   const hmacSecret = getRequiredEnv("NANO_SERVER_HMAC_SECRET");
   const ttlMs = Number(process.env.NANO_CHALLENGE_TTL_MS) || 600000;
-  const nonce = typeof nonceRaw === "string" ? nonceRaw : "";
+  const nonce = typeof nonceRaw === "string" ? nonceRaw.trim() : "";
   const timestamp = typeof timestampRaw === "number" ? timestampRaw : Number(timestampRaw) || 0;
-  const signature = typeof signatureRaw === "string" ? signatureRaw : "";
-  if (!nonce || !timestamp || !signature) return false;
+  const signature = typeof signatureRaw === "string" ? signatureRaw.trim() : "";
+  if (!nonce || !/^[a-f0-9]{32}$/i.test(nonce) || !timestamp || !signature) return false;
 
   const now = Date.now();
-  if (Math.abs(now - timestamp) > ttlMs) return false;
+  // Rejeita timestamps no futuro (além de 5s de tolerância de relógio) e desafios expirados
+  if (now < timestamp - 5000 || now - timestamp > ttlMs) {
+    return false;
+  }
 
   const expected = crypto
     .createHmac("sha256", hmacSecret)
@@ -284,8 +352,18 @@ export function verifySignedChallenge(
 
   const bufA = Buffer.from(signature, "hex");
   const bufB = Buffer.from(expected, "hex");
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
+  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
+    return false;
+  }
+
+  // Invalidação atômica de uso único (One-Time Nonce) contra Replay Attack
+  await dbExecute("DELETE FROM used_nonces WHERE expires_at < ?", [now]);
+  const inserted = await dbExecute(
+    "INSERT INTO used_nonces (nonce, expires_at) VALUES (?, ?) ON CONFLICT(nonce) DO NOTHING",
+    [nonce, timestamp + ttlMs]
+  );
+
+  return inserted > 0;
 }
 
 export function signServerResponse(payloadObj: Record<string, unknown>): {
@@ -335,7 +413,7 @@ export async function verifyCloudflareTurnstile(
 
   const secretKey = getRequiredEnv("TURNSTILE_SECRET_KEY");
   const expectedHostnames = new Set(
-    (process.env.TURNSTILE_HOSTNAMES || "")
+    (process.env.TURNSTILE_HOSTNAMES || "localhost,site-nano.vercel.app")
       .split(",")
       .map((hostname) => hostname.trim().toLowerCase())
       .filter(Boolean)
@@ -425,7 +503,9 @@ export function verifySessionToken(token: string | undefined): SessionPayload | 
   }
 
   try {
-    const parsed = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf-8")) as SessionPayload;
+    const parsed = JSON.parse(
+      Buffer.from(payloadB64, "base64url").toString("utf-8")
+    ) as SessionPayload;
     if (Date.now() > parsed.exp) return null;
     return parsed;
   } catch {

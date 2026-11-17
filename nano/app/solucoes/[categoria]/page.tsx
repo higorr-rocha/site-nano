@@ -1,0 +1,101 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import SiteBreadcrumb from "../../components/SiteBreadcrumb";
+import SiteFooter from "../../components/SiteFooter";
+import SiteHeader from "../../components/SiteHeader";
+import { categories, productsByCategory } from "../catalogo";
+
+type CategoriaPageProps = {
+  params: Promise<{ categoria: string }>;
+};
+
+export function generateStaticParams() {
+  return categories.map(({ slug }) => ({ categoria: slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: CategoriaPageProps): Promise<Metadata> {
+  const { categoria } = await params;
+  const cat = categories.find(({ slug }) => slug === categoria);
+  if (!cat) {
+    return { title: "Soluções | Nanoquímica" };
+  }
+
+  return {
+    title: `Soluções para ${cat.title} | Nanoquímica`,
+    description: cat.description,
+  };
+}
+
+export default async function CategoriaPage({ params }: CategoriaPageProps) {
+  const { categoria } = await params;
+  const cat = categories.find(({ slug }) => slug === categoria);
+  const products = productsByCategory[categoria];
+
+  if (!cat || !products) {
+    notFound();
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f5f2eb] pt-20 text-[#24298D]">
+      <SiteHeader activePage="solucoes" />
+      <SiteBreadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Produtos", href: "/solucoes" },
+          { label: cat.title },
+        ]}
+      />
+      <section className="bg-[#24298D] px-6 py-7 text-white lg:px-10 lg:py-10">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            href="/solucoes"
+            className="text-sm font-bold text-[#FF8200] hover:text-white"
+          >
+            ← Voltar para produtos
+          </Link>
+          <div className="text-center">
+            <p className="mb-2 mt-4 text-xs font-bold uppercase tracking-[0.2em] text-[#FF8200]">
+              Categoria
+            </p>
+            <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl">
+              {cat.title}
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-white/80">
+              {cat.description}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {products.map(({ slug, title, image }) => (
+            <Link
+              key={slug}
+              href={`/solucoes/${cat.slug}/${slug}`}
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_35px_rgba(36,41,141,0.08)]"
+            >
+              <div className="relative aspect-[700/480] overflow-hidden bg-[#24298D]/10">
+                <Image
+                  src={image}
+                  alt={title}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-5">
+                <h2 className="text-base font-bold leading-6">{title}</h2>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+      <SiteFooter />
+    </main>
+  );
+}

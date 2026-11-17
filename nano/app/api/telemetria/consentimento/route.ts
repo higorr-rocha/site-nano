@@ -10,7 +10,7 @@ import { saveTelemetryConsent } from "../../../lib/store";
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
-  const rl = checkRateLimit(`consent_${clientId}`, 20, 60 * 1000, 60 * 1000);
+  const rl = await checkRateLimit(`consent_${clientId}`, 20, 60 * 1000, 60 * 1000);
   if (!rl.allowed) {
     return signedJsonResponse(
       { ok: false, error: "Muitas requisições. Tente novamente em instantes." },
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         .digest("hex")
         .slice(0, 32);
 
-    const saved = saveTelemetryConsent({
+    const saved = await saveTelemetryConsent({
       fingerprintHash,
       essentialAccepted: true,
       analyticsAccepted,
@@ -55,12 +55,17 @@ export async function POST(req: NextRequest) {
       analyticsAccepted: saved.analyticsAccepted,
     });
 
-    res.cookies.set("nano_cookie_consent", analyticsAccepted ? "essential_analytics" : "essential_only", {
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 180,
-    });
+    res.cookies.set(
+      "nano_cookie_consent",
+      analyticsAccepted ? "essential_analytics" : "essential_only",
+      {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 180,
+      }
+    );
 
     return res;
   } catch {

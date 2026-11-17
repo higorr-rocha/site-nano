@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const data = getStoreDataForScopes(session.scopes);
+  const data = await getStoreDataForScopes(session.scopes);
 
   return signedJsonResponse({
     ok: true,

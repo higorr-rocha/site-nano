@@ -1,7 +1,8 @@
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
 import { dbExecute, dbQueryAll, dbQueryGet } from "./db";
+
+export type ContactStatus = "Novo" | "Em atendimento" | "Concluído";
+export type JobStatus = "Recebido" | "Em análise" | "Aprovado";
 
 export interface ContactSubmission {
   id: string;
@@ -13,7 +14,7 @@ export interface ContactSubmission {
   cidade: string;
   uf: string;
   mensagem: string;
-  status: "Novo" | "Em atendimento" | "Concluído";
+  status: ContactStatus;
   fingerprintHash: string;
 }
 
@@ -31,7 +32,7 @@ export interface JobSubmission {
   arquivoMime: string;
   arquivoTamanhoBytes: number;
   arquivoBase64?: string;
-  status: "Recebido" | "Em análise" | "Aprovado";
+  status: JobStatus;
   fingerprintHash: string;
 }
 
@@ -59,7 +60,7 @@ interface DbContactRow {
   cidade: string;
   uf: string;
   mensagem: string;
-  status: "Novo" | "Em atendimento" | "Concluído";
+  status: ContactStatus;
   fingerprint_hash: string;
 }
 
@@ -77,7 +78,7 @@ interface DbJobRow {
   arquivo_mime: string;
   arquivo_tamanho_bytes: number;
   arquivo_base64?: string;
-  status: "Recebido" | "Em análise" | "Aprovado";
+  status: JobStatus;
   fingerprint_hash: string;
 }
 
@@ -93,16 +94,14 @@ interface DbConsentRow {
   platform: string;
 }
 
-const PRIVATE_CV_DIR = path.join(process.cwd(), "storage", "curriculos");
-
-export function addContactSubmission(
+export async function addContactSubmission(
   entry: Omit<ContactSubmission, "id" | "createdAt" | "status">
-): ContactSubmission {
+): Promise<ContactSubmission> {
   const id = "cnt_" + crypto.randomBytes(6).toString("hex");
   const createdAt = new Date().toISOString();
-  const status = "Novo";
+  const status: ContactStatus = "Novo";
 
-  dbExecute(
+  await dbExecute(
     `INSERT INTO contacts (id, created_at, nome, empresa, email, telefone, cidade, uf, mensagem, status, fingerprint_hash)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
@@ -128,31 +127,18 @@ export function addContactSubmission(
   };
 }
 
-export function addJobSubmission(
-  entry: Omit<JobSubmission, "id" | "createdAt" | "status">
-): JobSubmission {
+export async function addJobSubmission(
+  entry: Omit<JobSubmission, "id" | "createdAt" | "status"> & { arquivoBase64: string }
+): Promise<JobSubmission> {
   const id = "job_" + crypto.randomBytes(6).toString("hex");
   const createdAt = new Date().toISOString();
-  const status = "Recebido";
+  const status: JobStatus = "Recebido";
 
-  // Save physical file into private storage directory (storage/curriculos/<id>_<arquivoNome>) outside public/
-  if (entry.arquivoBase64) {
-    try {
-      if (!fs.existsSync(PRIVATE_CV_DIR)) {
-        fs.mkdirSync(PRIVATE_CV_DIR, { recursive: true });
-      }
-      const rawB64 = entry.arquivoBase64.includes(",")
-        ? entry.arquivoBase64.split(",")[1]
-        : entry.arquivoBase64;
-      const fileBuffer = Buffer.from(rawB64, "base64");
-      const safeDiskName = `${id}_${entry.arquivoNome.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-      fs.writeFileSync(path.join(PRIVATE_CV_DIR, safeDiskName), fileBuffer);
-    } catch {
-      // fallback to SQLite column arquivo_base64 if disk is read-only
-    }
-  }
+  const rawB64 = entry.arquivoBase64.includes(",")
+    ? entry.arquivoBase64.split(",")[1]
+    : entry.arquivoBase64;
 
-  dbExecute(
+  await dbExecute(
     `INSERT INTO job_applications (id, created_at, nome, email, telefone, cidade, uf, vaga, mensagem, arquivo_nome, arquivo_mime, arquivo_tamanho_bytes, arquivo_base64, status, fingerprint_hash)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
@@ -168,7 +154,7 @@ export function addJobSubmission(
       entry.arquivoNome,
       entry.arquivoMime,
       entry.arquivoTamanhoBytes,
-      entry.arquivoBase64 || null,
+      rawB64,
       status,
       entry.fingerprintHash,
     ]
@@ -182,52 +168,67 @@ export function addJobSubmission(
   };
 }
 
-export function getJobResumeById(jobId: string): {
+export async function getJobResumeById(jobId: string): Promise<{
   fileName: string;
   mimeType: string;
   buffer: Buffer;
-} | null {
-  const row = dbQueryGet<DbJobRow>(
+} | null> {
+  const row = await dbQueryGet<DbJobRow>(
     "SELECT id, arquivo_nome, arquivo_mime, arquivo_base64 FROM job_applications WHERE id = ? LIMIT 1",
     [jobId]
   );
-  if (!row) return null;
+  if (!row || !row.arquivo_base64) return null;
 
-  // 1. Check private disk storage first (storage/curriculos/)
-  const diskCandidate = path.join(
-    PRIVATE_CV_DIR,
-    `${row.id}_${row.arquivo_nome.replace(/[^a-zA-Z0-9._-]/g, "_")}`
-  );
-  if (fs.existsSync(diskCandidate)) {
-    return {
-      fileName: row.arquivo_nome,
-      mimeType: row.arquivo_mime,
-      buffer: fs.readFileSync(diskCandidate),
-    };
-  }
+  const rawB64 = String(row.arquivo_base64).includes(",")
+    ? String(row.arquivo_base64).split(",")[1]
+    : String(row.arquivo_base64);
 
-  // 2. Fallback to database BLOB/base64 column
-  if (row.arquivo_base64) {
-    const rawB64 = row.arquivo_base64.includes(",")
-      ? row.arquivo_base64.split(",")[1]
-      : row.arquivo_base64;
-    return {
-      fileName: row.arquivo_nome,
-      mimeType: row.arquivo_mime,
-      buffer: Buffer.from(rawB64, "base64"),
-    };
-  }
-
-  return null;
+  return {
+    fileName: String(row.arquivo_nome),
+    mimeType: String(row.arquivo_mime),
+    buffer: Buffer.from(rawB64, "base64"),
+  };
 }
 
-export function saveTelemetryConsent(
+export async function updateContactStatus(
+  id: string,
+  status: ContactStatus
+): Promise<boolean> {
+  const changes = await dbExecute(
+    "UPDATE contacts SET status = ? WHERE id = ?",
+    [status, id]
+  );
+  return changes > 0;
+}
+
+export async function deleteContactSubmission(id: string): Promise<boolean> {
+  const changes = await dbExecute("DELETE FROM contacts WHERE id = ?", [id]);
+  return changes > 0;
+}
+
+export async function updateJobStatus(
+  id: string,
+  status: JobStatus
+): Promise<boolean> {
+  const changes = await dbExecute(
+    "UPDATE job_applications SET status = ? WHERE id = ?",
+    [status, id]
+  );
+  return changes > 0;
+}
+
+export async function deleteJobSubmission(id: string): Promise<boolean> {
+  const changes = await dbExecute("DELETE FROM job_applications WHERE id = ?", [id]);
+  return changes > 0;
+}
+
+export async function saveTelemetryConsent(
   entry: Omit<TelemetryConsentRecord, "id" | "updatedAt">
-): TelemetryConsentRecord {
+): Promise<TelemetryConsentRecord> {
   const id = "cns_" + crypto.randomBytes(6).toString("hex");
   const updatedAt = new Date().toISOString();
 
-  dbExecute(
+  await dbExecute(
     `INSERT INTO telemetry_consents (id, updated_at, fingerprint_hash, essential_accepted, analytics_accepted, language, timezone, screen_resolution, platform)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(fingerprint_hash) DO UPDATE SET
@@ -258,60 +259,66 @@ export function saveTelemetryConsent(
   };
 }
 
-export function getStoreDataForScopes(scopes: string[]) {
+export async function getStoreDataForScopes(scopes: string[]) {
   const contacts: ContactSubmission[] | null = scopes.includes("contatos")
-    ? dbQueryAll<DbContactRow>(
-        "SELECT id, created_at, nome, empresa, email, telefone, cidade, uf, mensagem, status, fingerprint_hash FROM contacts ORDER BY created_at DESC"
+    ? (
+        await dbQueryAll<DbContactRow>(
+          "SELECT id, created_at, nome, empresa, email, telefone, cidade, uf, mensagem, status, fingerprint_hash FROM contacts ORDER BY created_at DESC"
+        )
       ).map((r) => ({
-        id: r.id,
-        createdAt: r.created_at,
-        nome: r.nome,
-        empresa: r.empresa,
-        email: r.email,
-        telefone: r.telefone,
-        cidade: r.cidade,
-        uf: r.uf,
-        mensagem: r.mensagem,
-        status: r.status,
-        fingerprintHash: r.fingerprint_hash,
+        id: String(r.id),
+        createdAt: String(r.created_at),
+        nome: String(r.nome),
+        empresa: String(r.empresa),
+        email: String(r.email),
+        telefone: String(r.telefone),
+        cidade: String(r.cidade),
+        uf: String(r.uf),
+        mensagem: String(r.mensagem),
+        status: (r.status as ContactStatus) || "Novo",
+        fingerprintHash: String(r.fingerprint_hash),
       }))
     : null;
 
   const applications: JobSubmission[] | null = scopes.includes("candidaturas")
-    ? dbQueryAll<DbJobRow>(
-        "SELECT id, created_at, nome, email, telefone, cidade, uf, vaga, mensagem, arquivo_nome, arquivo_mime, arquivo_tamanho_bytes, status, fingerprint_hash FROM job_applications ORDER BY created_at DESC"
+    ? (
+        await dbQueryAll<DbJobRow>(
+          "SELECT id, created_at, nome, email, telefone, cidade, uf, vaga, mensagem, arquivo_nome, arquivo_mime, arquivo_tamanho_bytes, status, fingerprint_hash FROM job_applications ORDER BY created_at DESC"
+        )
       ).map((r) => ({
-        id: r.id,
-        createdAt: r.created_at,
-        nome: r.nome,
-        email: r.email,
-        telefone: r.telefone,
-        cidade: r.cidade,
-        uf: r.uf,
-        vaga: r.vaga,
-        mensagem: r.mensagem,
-        arquivoNome: r.arquivo_nome,
-        arquivoMime: r.arquivo_mime,
-        arquivoTamanhoBytes: r.arquivo_tamanho_bytes,
-        status: r.status,
-        fingerprintHash: r.fingerprint_hash,
+        id: String(r.id),
+        createdAt: String(r.created_at),
+        nome: String(r.nome),
+        email: String(r.email),
+        telefone: String(r.telefone),
+        cidade: String(r.cidade),
+        uf: String(r.uf),
+        vaga: String(r.vaga),
+        mensagem: String(r.mensagem),
+        arquivoNome: String(r.arquivo_nome),
+        arquivoMime: String(r.arquivo_mime),
+        arquivoTamanhoBytes: Number(r.arquivo_tamanho_bytes),
+        status: (r.status as JobStatus) || "Recebido",
+        fingerprintHash: String(r.fingerprint_hash),
       }))
     : null;
 
   const consents: TelemetryConsentRecord[] | null = scopes.includes("telemetria")
-    ? dbQueryAll<DbConsentRow>(
-        "SELECT id, updated_at, fingerprint_hash, essential_accepted, analytics_accepted, language, timezone, screen_resolution, platform FROM telemetry_consents ORDER BY updated_at DESC"
+    ? (
+        await dbQueryAll<DbConsentRow>(
+          "SELECT id, updated_at, fingerprint_hash, essential_accepted, analytics_accepted, language, timezone, screen_resolution, platform FROM telemetry_consents ORDER BY updated_at DESC"
+        )
       ).map((r) => ({
-        id: r.id,
-        updatedAt: r.updated_at,
-        fingerprintHash: r.fingerprint_hash,
-        essentialAccepted: Boolean(r.essential_accepted),
-        analyticsAccepted: Boolean(r.analytics_accepted),
+        id: String(r.id),
+        updatedAt: String(r.updated_at),
+        fingerprintHash: String(r.fingerprint_hash),
+        essentialAccepted: Boolean(Number(r.essential_accepted)),
+        analyticsAccepted: Boolean(Number(r.analytics_accepted)),
         browserInfo: {
-          language: r.language,
-          timezone: r.timezone,
-          screenResolution: r.screen_resolution,
-          platform: r.platform,
+          language: String(r.language),
+          timezone: String(r.timezone),
+          screenResolution: String(r.screen_resolution),
+          platform: String(r.platform),
         },
       }))
     : null;

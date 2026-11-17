@@ -58,7 +58,7 @@ export default function CuriosidadesAcidoFosforicoPage() {
           <h2 className="text-2xl font-black leading-tight tracking-[-0.04em] text-[#24298D] sm:text-3xl">
             Eficiência para o Açúcar de Alta Qualidade
           </h2>
-          <div className="mt-4 space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
             <p>
               No setor sucroenergético, a procura por açúcar de alta pureza e a melhoria da eficiência operacional são desafios permanentes. A etapa de clarificação do caldo de cana é fundamental para eliminar impurezas e corantes, e o êxito desse processo depende da qualidade dos insumos utilizados.
             </p>
@@ -91,7 +91,7 @@ export default function CuriosidadesAcidoFosforicoPage() {
             <h2 className="text-2xl font-black leading-tight tracking-[-0.03em] text-[#24298D] sm:text-3xl">
               Por que usar ácido fosfórico purificado na clarificação?
             </h2>
-            <div className="mt-4 max-w-6xl space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+            <div className="mt-4 max-w-6xl space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
               <p>
                 O produto final é diretamente afetado pela qualidade do agente clarificante. O NanoPhós Purificado é submetido a processos de purificação rigorosos, o que resulta em um produto de alta qualidade, isento de impurezas e contaminantes. Essa pureza é essencial para prevenir a contaminação do caldo por elementos indesejados.
               </p>
@@ -118,7 +118,7 @@ export default function CuriosidadesAcidoFosforicoPage() {
             <h2 className="text-2xl font-black leading-tight sm:text-3xl">
               Benefícios na qualidade do açúcar e na estabilidade do processo
             </h2>
-            <div className="mt-7 grid gap-x-8 gap-y-7 text-justify text-xs leading-6 text-white/85 sm:text-sm md:grid-cols-3">
+            <div className="mt-7 grid gap-x-8 gap-y-7 text-left sm:text-justify hyphens-auto text-xs leading-6 text-white/85 sm:text-sm md:grid-cols-3">
               <div>
                 <h3 className="font-bold text-white underline">Qualidade do Açúcar:</h3>
                 <p className="mt-2">
@@ -158,7 +158,7 @@ export default function CuriosidadesAcidoFosforicoPage() {
             <h2 className="text-2xl font-black leading-tight text-[#24298D] sm:text-3xl">
               Onde o ácido agrega mais valor
             </h2>
-            <div className="mt-4 space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+            <div className="mt-4 space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
               <p>
                 A floculação é otimizada com o uso do NanoPhós Purificado. A adição de leite de cal geralmente estimula a formação de fosfato de cálcio. Sua função é limpar o caldo, transformando as impurezas (tanto orgânicas quanto inorgânicas) em flocos que podem ser facilmente removidos.
               </p>
@@ -186,7 +186,7 @@ export default function CuriosidadesAcidoFosforicoPage() {
             {faqs.map((faq) => (
               <article key={faq.question} className="rounded-2xl bg-[#FAF8F3] p-6 shadow-[0_12px_35px_rgba(36,41,141,0.06)]">
                 <h3 className="text-sm font-black text-[#24298D]">{faq.question}</h3>
-                <p className="mt-3 text-justify text-sm leading-6 text-slate-600">{faq.answer}</p>
+                <p className="mt-3 text-left sm:text-justify hyphens-auto text-sm leading-6 text-slate-600">{faq.answer}</p>
               </article>
             ))}
           </div>

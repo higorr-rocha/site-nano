@@ -21,7 +21,7 @@ export default function ProductDetailSections({
               {details.featuresTitle}
             </h2>
             {details.featuresParagraphs && (
-              <div className="mt-4 max-w-6xl space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+              <div className="mt-4 max-w-6xl space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
                 {details.featuresParagraphs.map((paragraph, idx) => (
                   <p key={idx}>{paragraph}</p>
                 ))}
@@ -50,7 +50,7 @@ export default function ProductDetailSections({
               </p>
             )}
             <div
-              className={`mt-7 grid gap-x-8 gap-y-7 text-justify text-xs leading-6 text-white/85 sm:text-sm ${
+              className={`mt-7 grid gap-x-8 gap-y-7 text-left sm:text-justify hyphens-auto text-xs leading-6 text-white/85 sm:text-sm ${
                 details.gridItems.length === 1
                   ? "md:grid-cols-1"
                   : details.gridItems.length === 2 || details.gridItems.length === 4
@@ -86,7 +86,7 @@ export default function ProductDetailSections({
                 {details.highlightTitle}
               </h2>
               {details.highlightParagraphs && (
-                <div className="mt-4 space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+                <div className="mt-4 space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
                   {details.highlightParagraphs.map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
@@ -100,7 +100,7 @@ export default function ProductDetailSections({
               {details.highlightTitle}
             </h2>
             {details.highlightParagraphs && (
-              <div className="mt-4 max-w-6xl space-y-4 text-justify text-sm leading-7 text-slate-600 sm:text-base">
+              <div className="mt-4 max-w-6xl space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base">
                 {details.highlightParagraphs.map((paragraph, idx) => (
                   <p key={idx}>{paragraph}</p>
                 ))}
@@ -125,7 +125,7 @@ export default function ProductDetailSections({
           <h2 className="text-2xl font-black leading-tight text-[#24298D] sm:text-3xl">
             {details.conclusionTitle}
           </h2>
-          <div className="mt-6 grid gap-7 text-justify text-sm leading-7 text-slate-600 sm:text-base lg:grid-cols-2">
+          <div className="mt-6 grid gap-7 text-left sm:text-justify hyphens-auto text-sm leading-7 text-slate-600 sm:text-base lg:grid-cols-2">
             <div className="space-y-5">
               {(details.conclusionLeft || []).map((paragraph, idx) => (
                 <p key={idx}>{paragraph}</p>

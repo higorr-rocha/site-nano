@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import Script from "next/script";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { syncTelemetryConsentOnFormSubmit } from "./CookieConsentBanner";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 const ufs = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -8,7 +12,8 @@ const ufs = [
   "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
 
-const MAPS_URL = "https://www.google.com/maps?saddr=My+Location&daddr=Rua+Rua+Alexandre+Magnusson%2C+2100%0ADistrito+Industrial+%0APrad%C3%B3polis+SP.";
+const MAPS_URL =
+  "https://www.google.com/maps?saddr=My+Location&daddr=Rua+Alexandre+Magnusson%2C+2100%0ADistrito+Industrial+%0APrad%C3%B3polis+SP.";
 
 export default function ContactFormBlock() {
   const [submitted, setSubmitted] = useState(false);
@@ -24,6 +29,10 @@ export default function ContactFormBlock() {
   const [uf, setUf] = useState("SP");
   const [mensagem, setMensagem] = useState("");
 
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileToken = useRef<string | null>(null);
+
   const [challenge, setChallenge] = useState<{
     challengeNonce: string;
     challengeTimestamp: number;
@@ -32,23 +41,61 @@ export default function ContactFormBlock() {
 
   const fetchChallenge = async () => {
     try {
-      const res = await fetch("/api/seguranca/desafio");
+      const res = await fetch(`/api/seguranca/desafio?t=${Date.now()}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
       if (data.ok) {
-        setChallenge({
+        const nextChallenge = {
           challengeNonce: data.challengeNonce,
           challengeTimestamp: data.challengeTimestamp,
           challengeSignature: data.challengeSignature,
-        });
+        };
+        setChallenge(nextChallenge);
+        return nextChallenge;
       }
     } catch {
       // ignore
     }
+    return null;
   };
 
-  useEffect(() => {
-    fetchChallenge();
+  const initializeTurnstile = useCallback(() => {
+    if (
+      !TURNSTILE_SITE_KEY ||
+      typeof window === "undefined" ||
+      !window.turnstile ||
+      !turnstileContainerRef.current ||
+      turnstileWidgetId.current
+    ) {
+      return;
+    }
+
+    turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      action: "contact",
+      callback: (token) => {
+        turnstileToken.current = token;
+      },
+      "expired-callback": () => {
+        turnstileToken.current = null;
+      },
+      "error-callback": () => {
+        turnstileToken.current = null;
+      },
+    });
   }, []);
+
+  useEffect(() => {
+    void fetchChallenge();
+    initializeTurnstile();
+    return () => {
+      if (turnstileWidgetId.current && typeof window !== "undefined" && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [initializeTurnstile]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,18 +103,8 @@ export default function ContactFormBlock() {
     setLoading(true);
 
     try {
-      let activeChallenge = challenge;
-      if (!activeChallenge) {
-        const cRes = await fetch("/api/seguranca/desafio");
-        activeChallenge = await cRes.json();
-      }
-
-      let fingerprintHash = "";
-      try {
-        fingerprintHash = localStorage.getItem("nanoquimica_browser_fp") || "";
-      } catch {
-        // ignore
-      }
+      const activeChallenge = (await fetchChallenge()) || challenge;
+      const fingerprintHash = await syncTelemetryConsentOnFormSubmit();
 
       const res = await fetch("/api/contato", {
         method: "POST",
@@ -81,6 +118,7 @@ export default function ContactFormBlock() {
           uf: String(uf),
           mensagem: String(mensagem),
           fingerprintHash,
+          turnstileToken: turnstileToken.current || "",
           challengeNonce: activeChallenge?.challengeNonce,
           challengeTimestamp: activeChallenge?.challengeTimestamp,
           challengeSignature: activeChallenge?.challengeSignature,
@@ -90,6 +128,9 @@ export default function ContactFormBlock() {
       const result = await res.json();
       if (!res.ok || !result.ok) {
         setErrorMsg(result.error || "Não foi possível enviar sua mensagem.");
+        if (turnstileWidgetId.current && window.turnstile) {
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
         await fetchChallenge();
       } else {
         setProtocolo(result.protocolo || "");
@@ -101,6 +142,9 @@ export default function ContactFormBlock() {
         setCidade("");
         setUf("SP");
         setMensagem("");
+        if (turnstileWidgetId.current && window.turnstile) {
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
         await fetchChallenge();
       }
     } catch {
@@ -112,6 +156,13 @@ export default function ContactFormBlock() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+      {TURNSTILE_SITE_KEY && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+          onLoad={initializeTurnstile}
+        />
+      )}
       <div className="rounded-2xl bg-white p-8 shadow-[0_16px_50px_rgba(9,36,111,0.08)]">
         <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-[#FF8200]">
           Tem interesse?
@@ -124,7 +175,10 @@ export default function ContactFormBlock() {
         </p>
 
         {errorMsg && (
-          <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-xs font-bold text-red-700">
+          <div
+            role="alert"
+            className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-xs font-bold text-red-700"
+          >
             {errorMsg}
           </div>
         )}
@@ -147,8 +201,11 @@ export default function ContactFormBlock() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Nome*</label>
+                <label htmlFor="contato-nome" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Nome*
+                </label>
                 <input
+                  id="contato-nome"
                   type="text"
                   required
                   maxLength={120}
@@ -159,8 +216,11 @@ export default function ContactFormBlock() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Empresa*</label>
+                <label htmlFor="contato-empresa" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Empresa*
+                </label>
                 <input
+                  id="contato-empresa"
                   type="text"
                   required
                   maxLength={120}
@@ -174,8 +234,11 @@ export default function ContactFormBlock() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Email*</label>
+                <label htmlFor="contato-email" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Email*
+                </label>
                 <input
+                  id="contato-email"
                   type="email"
                   required
                   maxLength={120}
@@ -186,8 +249,11 @@ export default function ContactFormBlock() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Telefone</label>
+                <label htmlFor="contato-telefone" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Telefone
+                </label>
                 <input
+                  id="contato-telefone"
                   type="tel"
                   maxLength={40}
                   value={telefone}
@@ -200,8 +266,11 @@ export default function ContactFormBlock() {
 
             <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Cidade</label>
+                <label htmlFor="contato-cidade" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Cidade
+                </label>
                 <input
+                  id="contato-cidade"
                   type="text"
                   maxLength={80}
                   value={cidade}
@@ -211,8 +280,11 @@ export default function ContactFormBlock() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-[#24298D]">Estado (UF)</label>
+                <label htmlFor="contato-uf" className="mb-1 block text-xs font-bold text-[#24298D]">
+                  Estado (UF)
+                </label>
                 <select
+                  id="contato-uf"
                   value={uf}
                   onChange={(e) => setUf(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
@@ -227,8 +299,11 @@ export default function ContactFormBlock() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-bold text-[#24298D]">Mensagem*</label>
+              <label htmlFor="contato-mensagem" className="mb-1 block text-xs font-bold text-[#24298D]">
+                Mensagem*
+              </label>
               <textarea
+                id="contato-mensagem"
                 required
                 rows={4}
                 maxLength={2000}
@@ -238,6 +313,8 @@ export default function ContactFormBlock() {
                 className="w-full rounded-xl border border-slate-200 bg-[#f5f2eb] px-4 py-3 text-sm text-[#24298D] outline-none transition focus:border-[#FF8200]"
               />
             </div>
+
+            <div ref={turnstileContainerRef} aria-hidden="true" />
 
             <button
               type="submit"

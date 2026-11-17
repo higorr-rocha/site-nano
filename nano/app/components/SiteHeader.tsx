@@ -11,7 +11,6 @@ export type ActivePage =
   | "solucoes"
   | "certificacoes"
   | "novidades"
-  | "servicos"
   | "trabalhe-conosco"
   | "contato";
 
@@ -36,15 +35,15 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white shadow-[0_4px_20px_rgba(36,41,141,0.08)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-10">
         <Link href="/" className="flex h-12 shrink-0 items-center" aria-label="Nanoquímica - início">
-          <span className="relative flex h-14 w-56 items-center overflow-hidden" aria-hidden="true">
-            <Image
-              src={logo}
-              alt=""
-              width={245}
-              height={245}
-              className="absolute left-[-27px] top-[-95px] max-w-none"
-            />
-          </span>
+          <Image
+            src={logo}
+            alt="Nanoquímica"
+            width={190}
+            height={40}
+            priority
+            style={{ width: "190px", height: "40px" }}
+            className="object-contain"
+          />
         </Link>
 
         <nav className="ml-auto hidden h-12 items-center gap-7 text-sm font-semibold lg:flex xl:gap-9">
@@ -58,15 +57,16 @@ export default function SiteHeader({ activePage }: SiteHeaderProps) {
             <Link
               className={activePage === "solucoes" ? "text-[#FF8200]" : "transition-colors hover:text-[#FF8200]"}
               href="/solucoes"
+              aria-haspopup="true"
             >
               Soluções
             </Link>
-            <div className="invisible absolute left-1/2 top-full z-50 w-52 -translate-x-1/2 translate-y-2 rounded-xl border border-slate-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+            <div className="invisible absolute left-1/2 top-full z-50 w-52 -translate-x-1/2 translate-y-2 rounded-xl border border-slate-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {["acucar", "etanol", "industria"].map((category) => (
                 <Link
                   key={category}
                   href={`/solucoes/${category}`}
-                  className="block rounded-lg px-4 py-3 text-sm font-semibold capitalize text-[#24298D] hover:bg-[#24298D]/10 hover:text-[#FF8200]"
+                  className="block rounded-lg px-4 py-3 text-sm font-semibold capitalize text-[#24298D] hover:bg-[#24298D]/10 hover:text-[#FF8200] focus:bg-[#24298D]/10 focus:text-[#FF8200] focus:outline-none"
                 >
                   {category === "acucar" ? "Açúcar" : category === "industria" ? "Indústria" : "Etanol"}
                 </Link>

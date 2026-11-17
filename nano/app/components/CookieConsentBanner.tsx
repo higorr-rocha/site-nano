@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "";
 
-async function computeBrowserFingerprint(): Promise<{
+export async function computeBrowserFingerprint(): Promise<{
   fingerprintHash: string;
   language: string;
   timezone: string;
@@ -53,6 +53,49 @@ async function computeBrowserFingerprint(): Promise<{
   return { fingerprintHash, language, timezone, screenResolution, platform };
 }
 
+/**
+ * Sincroniza o registro de consentimento/fingerprint com o banco de dados Turso
+ * exclusivamente quando o usuário interage ativamente com um formulário (prevenção à fraude, Art. 7º, IX da LGPD).
+ */
+export async function syncTelemetryConsentOnFormSubmit(): Promise<string> {
+  const fpData = await computeBrowserFingerprint();
+  let analyticsAccepted = false;
+
+  try {
+    const saved = localStorage.getItem("nanoquimica_cookie_consent_v2");
+    if (saved) {
+      const parsed = JSON.parse(saved) as { analyticsAccepted?: boolean };
+      analyticsAccepted = Boolean(parsed.analyticsAccepted);
+    }
+    localStorage.setItem("nanoquimica_browser_fp", fpData.fingerprintHash);
+  } catch {
+    // ignore storage restrictions
+  }
+
+  const payload = {
+    essentialAccepted: true,
+    analyticsAccepted,
+    fingerprintHash: fpData.fingerprintHash,
+    language: fpData.language,
+    timezone: fpData.timezone,
+    screenResolution: fpData.screenResolution,
+    platform: fpData.platform,
+    savedAt: new Date().toISOString(),
+  };
+
+  try {
+    await fetch("/api/telemetria/consentimento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // ignore network errors during background consent sync
+  }
+
+  return fpData.fingerprintHash;
+}
+
 export default function CookieConsentBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
@@ -75,7 +118,9 @@ export default function CookieConsentBanner() {
     }
   }, []);
 
-  const persistConsent = async (mode: "all" | "reject" | "custom") => {
+  // No banner de cookies, a preferência fica salva apenas localmente no navegador (localStorage).
+  // O envio ao banco de dados ocorre somente quando o visitante utiliza um formulário do site.
+  const persistConsentLocally = async (mode: "all" | "reject" | "custom") => {
     const analyticsAccepted =
       mode === "all" ? true : mode === "reject" ? false : analyticsEnabled;
 
@@ -102,21 +147,11 @@ export default function CookieConsentBanner() {
     setGaGranted(analyticsAccepted);
     setIsVisible(false);
     setIsCustomizing(false);
-
-    try {
-      await fetch("/api/telemetria/consentimento", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch {
-      // ignore offline error
-    }
   };
 
   return (
     <>
-      {gaGranted && (
+      {gaGranted && GA_MEASUREMENT_ID && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
@@ -151,7 +186,7 @@ export default function CookieConsentBanner() {
                   </h2>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                  Coletamos apenas informações estritamente essenciais para segurança do site (hash de fingerprint do navegador, prevenção contra abusos e sessão segura) e métricas analíticas via Google Analytics. Consulte nossa{" "}
+                  Armazenamos localmente sua preferência de privacidade e utilizamos verificações essenciais de segurança ao enviar formulários, além de métricas analíticas opcionais via Google Analytics. Consulte nossa{" "}
                   <Link href="/politica-de-privacidade" className="font-bold text-[#FF8200] underline hover:text-[#24298D]">
                     Política de Privacidade
                   </Link>
@@ -169,14 +204,14 @@ export default function CookieConsentBanner() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => persistConsent("reject")}
+                  onClick={() => void persistConsentLocally("reject")}
                   className="rounded-full border border-slate-400 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100"
                 >
                   Rejeitar opcionais
                 </button>
                 <button
                   type="button"
-                  onClick={() => persistConsent("all")}
+                  onClick={() => void persistConsentLocally("all")}
                   className="rounded-full bg-[#FF8200] px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#FF8200]/85"
                 >
                   Aceitar tudo
@@ -187,28 +222,41 @@ export default function CookieConsentBanner() {
             {isCustomizing && (
               <div className="mt-5 border-t border-slate-200 pt-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <label
+                    htmlFor="cookie-essential-checkbox"
+                    className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                  >
                     <div>
                       <span className="block text-xs font-black text-[#24298D]">
-                        1. Cookies Essenciais e Fingerprint de Segurança (Obrigatório)
+                        1. Cookies Essenciais e Segurança de Formulários (Obrigatório)
                       </span>
                       <span className="mt-1 block text-[11px] leading-4 text-slate-500">
-                        Salva assinatura criptográfica de segurança, controle de rate-limit e fingerprint técnico essencial do navegador (idioma, fuso horário e resolução) para proteção contra ataques.
+                        Mantém sua escolha salva localmente no navegador e protege o envio de formulários contra abusos automatizados.
                       </span>
                     </div>
-                    <input type="checkbox" checked disabled className="mt-0.5 h-4 w-4 accent-[#24298D]" />
+                    <input
+                      id="cookie-essential-checkbox"
+                      type="checkbox"
+                      checked
+                      disabled
+                      className="mt-0.5 h-4 w-4 accent-[#24298D]"
+                    />
                   </label>
 
-                  <label className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <label
+                    htmlFor="cookie-analytics-checkbox"
+                    className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                  >
                     <div>
                       <span className="block text-xs font-black text-[#24298D]">
                         2. Google Analytics (Métricas de Navegação)
                       </span>
                       <span className="mt-1 block text-[11px] leading-4 text-slate-500">
-                        Ativa o Google Analytics (GA4) com IP anonimizado para medir páginas visitadas e desempenho essencial do site.
+                        Ativa o Google Analytics (GA4) com IP anonimizado para medir páginas visitadas e desempenho do site.
                       </span>
                     </div>
                     <input
+                      id="cookie-analytics-checkbox"
                       type="checkbox"
                       checked={analyticsEnabled}
                       onChange={(e) => setAnalyticsEnabled(e.target.checked)}
@@ -220,7 +268,7 @@ export default function CookieConsentBanner() {
                 <div className="mt-4 flex justify-end">
                   <button
                     type="button"
-                    onClick={() => persistConsent("custom")}
+                    onClick={() => void persistConsentLocally("custom")}
                     className="rounded-full bg-[#24298D] px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-[#24298D]/90"
                   >
                     Salvar preferências

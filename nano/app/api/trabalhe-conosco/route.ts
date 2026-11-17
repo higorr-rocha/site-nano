@@ -2,10 +2,12 @@ import { NextRequest } from "next/server";
 import {
   checkRateLimit,
   getClientIdentifier,
+  getClientIp,
   isValidEmail,
   sanitizeStrictString,
   signedJsonResponse,
   validateResumeFile,
+  verifyCloudflareTurnstile,
   verifySignedChallenge,
 } from "../../lib/security";
 import { addJobSubmission } from "../../lib/store";
@@ -13,7 +15,7 @@ import { isAvailableJobTitle } from "../../lib/job-openings";
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
-  const rl = checkRateLimit(`trabalhe_${clientId}`, 3, 15 * 60 * 1000, 15 * 60 * 1000);
+  const rl = await checkRateLimit(`trabalhe_${clientId}`, 3, 15 * 60 * 1000, 15 * 60 * 1000);
   if (!rl.allowed) {
     return signedJsonResponse(
       {
@@ -28,16 +30,33 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as Record<string, unknown>;
 
     if (
-      !verifySignedChallenge(
+      !(await verifySignedChallenge(
         body.challengeNonce,
         body.challengeTimestamp,
         body.challengeSignature
-      )
+      ))
     ) {
       return signedJsonResponse(
-        { ok: false, error: "Assinatura de segurança inválida ou expirada. Recarregue a página." },
+        { ok: false, error: "Assinatura de segurança inválida, expirada ou já utilizada. Recarregue a página." },
         403
       );
+    }
+
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      const captchaOk = await verifyCloudflareTurnstile(
+        body.turnstileToken,
+        getClientIp(req),
+        "career"
+      );
+      if (!captchaOk) {
+        return signedJsonResponse(
+          {
+            ok: false,
+            error: "Falha na verificação automática de segurança (Cloudflare Turnstile).",
+          },
+          403
+        );
+      }
     }
 
     const nome = sanitizeStrictString(body.nome, 120);
@@ -71,11 +90,11 @@ export async function POST(req: NextRequest) {
       body.arquivoBase64
     );
 
-    if (!fileCheck.valid) {
+    if (!fileCheck.valid || !fileCheck.cleanBase64) {
       return signedJsonResponse({ ok: false, error: fileCheck.error }, 400);
     }
 
-    const record = addJobSubmission({
+    const record = await addJobSubmission({
       nome,
       email,
       telefone,
@@ -84,9 +103,9 @@ export async function POST(req: NextRequest) {
       vaga,
       mensagem,
       arquivoNome: fileCheck.safeFileName!,
-      arquivoMime: sanitizeStrictString(body.arquivoMime, 120),
+      arquivoMime: sanitizeStrictString(body.arquivoMime, 120).toLowerCase(),
       arquivoTamanhoBytes: fileCheck.sizeBytes!,
-      arquivoBase64: typeof body.arquivoBase64 === 'string' ? body.arquivoBase64 : undefined,
+      arquivoBase64: fileCheck.cleanBase64,
       fingerprintHash,
     });
 

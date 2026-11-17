@@ -103,7 +103,7 @@ export default function Home() {
             <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               Visita técnica
             </h2>
-            <p className="mt-6 text-justify text-base leading-8 text-slate-600 sm:text-lg">
+            <p className="mt-6 text-left sm:text-justify hyphens-auto text-base leading-8 text-slate-600 sm:text-lg">
               Quando os clientes enfrentam desafios em seus processos, a Nanoquímica oferece assistência personalizada por meio de visitas técnicas no local. Nossa equipe altamente qualificada realiza uma análise detalhada, identificando as raízes do problema e fornecendo soluções eficazes e econômicas. Além disso, oferecemos orientação e treinamento para capacitar os clientes a lidar com desafios futuros. Com nosso compromisso com a excelência técnica e o serviço excepcional, garantimos a satisfação total de nossos clientes em todas as etapas.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -114,7 +114,7 @@ export default function Home() {
                 Entrar em contato
               </Link>
               <a
-                href="https://api.whatsapp.com/send?phone=5505516982100266"
+                href="https://wa.me/5516982100266"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-[#24298D] px-6 py-4 text-sm font-bold text-[#24298D] transition-colors hover:bg-[#24298D] hover:text-white"

@@ -20,12 +20,12 @@ export default async function AcessoSecaoPage({ params }: SecaoPageProps) {
   const session = verifySessionToken(token);
 
   if (!session) {
-    redirect("/acesso/login");
+    redirect("/acesso/login?bloqueado=1");
   }
 
   const { secao } = await params;
   const validSecao = secao as RoleScope;
-  const data = getStoreDataForScopes(session.scopes);
+  const data = await getStoreDataForScopes(session.scopes);
 
   const isAllowed = session.scopes.includes(validSecao);
   const activeSection = isAllowed ? validSecao : session.scopes[0];

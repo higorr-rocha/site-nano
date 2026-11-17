@@ -22,14 +22,14 @@ export default function ProductIntro({
         <h2 className="text-2xl font-black leading-tight tracking-[-0.04em] text-[#24298D] sm:text-3xl">
           {introHeading}
         </h2>
-        <div className="mt-4 max-w-xl space-y-4 text-justify text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+        <div className="mt-4 max-w-xl space-y-4 text-left sm:text-justify hyphens-auto text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
           {paragraphs.map((p, idx) => (
             <p key={idx}>{p}</p>
           ))}
         </div>
         <div className="mt-10 max-w-xl">
           <h2 className="text-xl font-black text-[#24298D]">Tem interesse?</h2>
-          <p className="mt-3 text-justify text-sm leading-6 text-slate-600 sm:text-base">
+          <p className="mt-3 text-left sm:text-justify hyphens-auto text-sm leading-6 text-slate-600 sm:text-base">
             {ctaText}
           </p>
           <Link

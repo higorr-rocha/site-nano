@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextRequest } from "next/server";
 import {
   checkRateLimit,
@@ -5,6 +6,7 @@ import {
   getClientIp,
   getClientIdentifier,
   getSessionCookieName,
+  sanitizeStrictString,
   signedJsonResponse,
   verifyAccountCredentials,
   verifyCloudflareTurnstile,
@@ -13,12 +15,12 @@ import {
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
-  const rl = checkRateLimit(`login_${clientId}`, 10, 15 * 60 * 1000, 15 * 60 * 1000);
-  if (!rl.allowed) {
+  const rlIp = await checkRateLimit(`login_ip_${clientId}`, 10, 15 * 60 * 1000, 15 * 60 * 1000);
+  if (!rlIp.allowed) {
     return signedJsonResponse(
       {
         ok: false,
-        error: `Muitas tentativas de login. Acesso bloqueado temporariamente por ${rl.retryAfterSeconds} segundos.`,
+        error: `Muitas tentativas de login deste endereço IP. Acesso bloqueado temporariamente por ${rlIp.retryAfterSeconds} segundos.`,
       },
       429
     );
@@ -26,16 +28,40 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as Record<string, unknown>;
+    const normalizedEmail = sanitizeStrictString(body.email, 120).toLowerCase();
+
+    if (normalizedEmail) {
+      const emailHash = crypto
+        .createHash("sha256")
+        .update(normalizedEmail)
+        .digest("hex")
+        .slice(0, 32);
+      const rlEmail = await checkRateLimit(
+        `login_email_${emailHash}`,
+        8,
+        15 * 60 * 1000,
+        15 * 60 * 1000
+      );
+      if (!rlEmail.allowed) {
+        return signedJsonResponse(
+          {
+            ok: false,
+            error: `Muitas tentativas para esta conta. Aguarde ${rlEmail.retryAfterSeconds} segundos antes de tentar novamente.`,
+          },
+          429
+        );
+      }
+    }
 
     if (
-      !verifySignedChallenge(
+      !(await verifySignedChallenge(
         body.challengeNonce,
         body.challengeTimestamp,
         body.challengeSignature
-      )
+      ))
     ) {
       return signedJsonResponse(
-        { ok: false, error: "Assinatura criptográfica da requisição inválida ou expirada." },
+        { ok: false, error: "Assinatura criptográfica da requisição inválida, expirada ou já utilizada." },
         403
       );
     }
@@ -52,7 +78,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const account = verifyAccountCredentials(body.email, body.password);
+    const account = await verifyAccountCredentials(body.email, body.password);
     if (!account) {
       return signedJsonResponse(
         { ok: false, error: "Credenciais inválidas ou conta não autorizada." },

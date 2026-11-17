@@ -2,16 +2,18 @@ import { NextRequest } from "next/server";
 import {
   checkRateLimit,
   getClientIdentifier,
+  getClientIp,
   isValidEmail,
   sanitizeStrictString,
   signedJsonResponse,
+  verifyCloudflareTurnstile,
   verifySignedChallenge,
 } from "../../lib/security";
 import { addContactSubmission } from "../../lib/store";
 
 export async function POST(req: NextRequest) {
   const clientId = getClientIdentifier(req);
-  const rl = checkRateLimit(`contato_${clientId}`, 5, 10 * 60 * 1000, 15 * 60 * 1000);
+  const rl = await checkRateLimit(`contato_${clientId}`, 5, 10 * 60 * 1000, 15 * 60 * 1000);
   if (!rl.allowed) {
     return signedJsonResponse(
       {
@@ -26,16 +28,33 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as Record<string, unknown>;
 
     if (
-      !verifySignedChallenge(
+      !(await verifySignedChallenge(
         body.challengeNonce,
         body.challengeTimestamp,
         body.challengeSignature
-      )
+      ))
     ) {
       return signedJsonResponse(
-        { ok: false, error: "Assinatura de segurança inválida ou expirada. Recarregue a página." },
+        { ok: false, error: "Assinatura de segurança inválida, expirada ou já utilizada. Recarregue a página." },
         403
       );
+    }
+
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      const captchaOk = await verifyCloudflareTurnstile(
+        body.turnstileToken,
+        getClientIp(req),
+        "contact"
+      );
+      if (!captchaOk) {
+        return signedJsonResponse(
+          {
+            ok: false,
+            error: "Falha na verificação automática de segurança (Cloudflare Turnstile).",
+          },
+          403
+        );
+      }
     }
 
     const nome = sanitizeStrictString(body.nome, 120);
@@ -58,7 +77,7 @@ export async function POST(req: NextRequest) {
       return signedJsonResponse({ ok: false, error: "Informe um endereço de e-mail válido." }, 400);
     }
 
-    const record = addContactSubmission({
+    const record = await addContactSubmission({
       nome,
       empresa,
       email,
